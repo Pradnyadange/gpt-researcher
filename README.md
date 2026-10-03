@@ -30,7 +30,11 @@
    - Evaluates documentation quality automatically.
    - Identifies crucial missing sections (e.g., Installation, Usage, API reference, License).
    - Generates a fully improved, professional Markdown README tailored specifically for your repository with a one-click copy option.
-5. **AI Repository Overview & Live Logs:** Inspect project tech stacks, languages, and frameworks instantly, backed by live WebSocket terminal execution logs.
+5. **🔍 Code Smells Audit:**
+   - Scans repository source files for bloated long functions, duplicate logic, naming problems, and error handling flaws with actionable refactoring advice.
+6. **🧠 RAG Semantic Search:**
+   - Search across your codebase by meaning rather than just exact keywords using advanced vector embeddings and retrieval.
+7. **AI Repository Overview & Live Logs:** Inspect project tech stacks, languages, and frameworks instantly, backed by live WebSocket terminal execution logs.
 
 ---
 
