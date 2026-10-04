@@ -15,7 +15,7 @@ DevAgent is an intelligent, context-aware developer copilot and repository manag
 
 ---
 
-## ⚡ How DevAgent is Different from Traditional GitHub
+## ⚡ How DevAgent is Different from Traditional GitHub 
 
 | Feature / Capability | Traditional GitHub | DevAgent (AI Developer Agent) |
 | :--- | :--- | :--- |
