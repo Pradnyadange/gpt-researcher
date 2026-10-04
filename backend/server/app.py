@@ -1,6 +1,7 @@
 import os
 import sys
 import base64
+import sqlite3
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -17,6 +18,90 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 GITHUB_API_URL = "https://api.github.com"
 client_ai = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+
+# Initialize Local SQLite Memory & Preferences Database
+DB_PATH = os.path.join(BASE_DIR, "devagent_memory.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS developer_preferences (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            preferences TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_memory (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            repo TEXT,
+            role TEXT,
+            message TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+def get_user_preferences(username: str) -> str:
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT preferences FROM developer_preferences WHERE username = ?", (username,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else "No specific preferences set."
+    except Exception:
+        return "No specific preferences set."
+
+def save_chat_memory(username: str, repo: str, role: str, message: str):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO chat_memory (username, repo, role, message) VALUES (?, ?, ?, ?)", (username, repo, role, message))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+def get_chat_memory(username: str, repo: str, limit: int = 5) -> str:
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT role, message FROM chat_memory WHERE username = ? AND repo = ? ORDER BY id DESC LIMIT ?", (username, repo, limit))
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return "No previous conversation history for this repository."
+        history = reversed(rows)
+        return "\n".join([f"{r[0].upper()}: {r[1]}" for r in history])
+    except Exception:
+        return "No previous conversation history."
+
+@app.get("/api/memory/preferences")
+async def get_preferences_api(request: Request):
+    user = request.session.get("github_user", "default_user")
+    return {"preferences": get_user_preferences(user)}
+
+@app.post("/api/memory/preferences")
+async def save_preferences_api(request: Request):
+    user = request.session.get("github_user", "default_user")
+    body = await request.json()
+    prefs = body.get("preferences", "")
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO developer_preferences (username, preferences) VALUES (?, ?)
+        ON CONFLICT(username) DO UPDATE SET preferences = ?
+    ''', (user, prefs, prefs))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "preferences": prefs}
 
 @app.get("/templates/hero-graphic.png")
 async def get_hero_graphic():
@@ -100,7 +185,7 @@ async def get_repo_overview(request: Request, owner: str, repo: str):
             file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{dep_file}", headers=headers)
             if file_res.status_code == 200:
                 try:
-                    content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8")
+                    content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
                     dependencies.append({"file": dep_file, "snippet": content[:400]})
                 except Exception:
                     pass
@@ -112,6 +197,7 @@ async def get_repo_overview(request: Request, owner: str, repo: str):
     if "flask" in dep_text: frameworks.append("Flask")
     if "react" in dep_text or "next" in dep_text: frameworks.append("Next.js / React")
     if "express" in dep_text: frameworks.append("Node.js Express")
+    if "drogon" in dep_text: frameworks.append("Drogon C++ Web Framework")
     if not frameworks: frameworks.append("Core Modular Architecture")
 
     return {
@@ -154,7 +240,7 @@ async def get_repo_file_content(request: Request, owner: str, repo: str, path: s
         if file_res.status_code != 200:
             raise HTTPException(status_code=404, detail="File not found")
         try:
-            content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8")
+            content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
         except Exception:
             content = "Binary or unreadable file content."
     return {"path": path, "content": content}
@@ -167,23 +253,29 @@ async def analyze_readme(request: Request):
     
     body = await request.json()
     owner, repo = body.get("owner"), body.get("repo")
+    user = request.session.get("github_user", "default_user")
+    prefs = get_user_preferences(user)
+    
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     
-    async with httpx.AsyncClient() as client:
-        repo_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}", headers=headers)
-        repo_data = repo_res.json() if repo_res.status_code == 200 else {}
-        
-        readme_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/readme", headers=headers)
-        readme_content = ""
-        if readme_res.status_code == 200:
-            try:
-                readme_content = base64.b64decode(readme_res.json().get("content", "")).decode("utf-8")
-            except Exception:
-                pass
+    try:
+        async with httpx.AsyncClient() as client:
+            repo_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}", headers=headers)
+            repo_data = repo_res.json() if repo_res.status_code == 200 else {}
+            
+            readme_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/readme", headers=headers)
+            readme_content = ""
+            if readme_res.status_code == 200:
+                try:
+                    readme_content = base64.b64decode(readme_res.json().get("content", "")).decode("utf-8", errors='ignore')
+                except Exception:
+                    pass
 
-    prompt = f"Analyze README quality, missing sections, and generate an improved README.md for {owner}/{repo}. Description: {repo_data.get('description')}. Current README: {readme_content}"
-    response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return {"analysis": response.text}
+        prompt = f"Developer Preferences: {prefs}\n\nAnalyze README quality, missing sections, and generate an improved README.md for {owner}/{repo}. Description: {repo_data.get('description')}. Current README: {readme_content}"
+        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        return {"analysis": response.text}
+    except Exception as e:
+        return {"analysis": f"⚠️ Analysis failed: {str(e)}"}
 
 @app.post("/api/repo/code-smells")
 async def analyze_code_smells(request: Request):
@@ -193,27 +285,38 @@ async def analyze_code_smells(request: Request):
     
     body = await request.json()
     owner, repo = body.get("owner"), body.get("repo")
+    user = request.session.get("github_user", "default_user")
+    prefs = get_user_preferences(user)
+    
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     
-    async with httpx.AsyncClient() as client:
-        tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-        if tree_res.status_code != 200:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-        tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-        files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    try:
+        async with httpx.AsyncClient() as client:
+            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
+            if tree_res.status_code != 200:
+                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
+            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
+            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
 
-        code_context = ""
-        for kf in [f for f in files if f.endswith(('.py', '.js', '.ts', '.java', '.cpp'))][:6]:
-            file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-            if file_res.status_code == 200:
-                try:
-                    code_context += f"\n--- FILE: {kf} ---\n{base64.b64decode(file_res.json().get('content', '')).decode('utf-8')[:1500]}\n"
-                except Exception:
-                    pass
+            code_context = ""
+            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp')
+            for kf in [f for f in files if f.endswith(target_exts)][:5]:
+                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
+                if file_res.status_code == 200:
+                    try:
+                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
+                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1200]}\n"
+                    except Exception:
+                        pass
 
-    prompt = f"Analyze code smells (Long Functions, Duplicate Code, Naming Problems, Error Handling) for {owner}/{repo}:\n{code_context}"
-    response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return {"analysis": response.text}
+        if not code_context:
+            code_context = "No readable source files found."
+
+        prompt = f"Developer Preferences: {prefs}\n\nAnalyze code smells (Long Functions, Duplicate Code, Naming Problems, Error Handling) for {owner}/{repo}:\n{code_context}"
+        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        return {"analysis": response.text}
+    except Exception as e:
+        return {"analysis": f"⚠️ Code smells analysis failed: {str(e)}"}
 
 @app.post("/api/repo/semantic-search")
 async def semantic_search(request: Request):
@@ -224,31 +327,35 @@ async def semantic_search(request: Request):
     body = await request.json()
     owner, repo, query = body.get("owner"), body.get("repo"), body.get("query", "")
     if not query:
-        return {"results": ""}
+        return {"results": "Please provide a search query."}
     
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    async with httpx.AsyncClient() as client:
-        tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-        if tree_res.status_code != 200:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-        tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-        files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    try:
+        async with httpx.AsyncClient() as client:
+            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
+            if tree_res.status_code != 200:
+                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
+            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
+            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
 
-        code_chunks = []
-        for kf in [f for f in files if f.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.md'))][:15]:
-            file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-            if file_res.status_code == 200:
-                try:
-                    content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8")
-                    for i in range(0, len(content), 800):
-                        if len(content[i:i+800].strip()) > 50:
-                            code_chunks.append({"path": kf, "snippet": content[i:i+800]})
-                except Exception:
-                    pass
+            code_chunks = []
+            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp', '.md')
+            for kf in [f for f in files if f.endswith(target_exts)][:10]:
+                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
+                if file_res.status_code == 200:
+                    try:
+                        content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
+                        for i in range(0, len(content), 800):
+                            if len(content[i:i+800].strip()) > 50:
+                                code_chunks.append({"path": kf, "snippet": content[i:i+800]})
+                    except Exception:
+                        pass
 
-    prompt = f"Semantic RAG Search. Intent: '{query}'. Chunks: {str(code_chunks[:25])}. Select top matching code chunks by meaning."
-    response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return {"results": response.text}
+        prompt = f"Semantic RAG Search. Intent: '{query}'. Chunks: {str(code_chunks[:20])}. Select top matching code chunks by meaning."
+        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        return {"results": response.text}
+    except Exception as e:
+        return {"results": f"⚠️ Semantic search failed: {str(e)}"}
 
 @app.post("/api/codebase/query")
 async def codebase_query(request: Request):
@@ -258,27 +365,53 @@ async def codebase_query(request: Request):
     
     body = await request.json()
     query, owner, repo = body.get("query", ""), body.get("owner"), body.get("repo")
+    user = request.session.get("github_user", "default_user")
+    
+    prefs = get_user_preferences(user)
+    history = get_chat_memory(user, f"{owner}/{repo}", limit=5)
+    
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     
-    async with httpx.AsyncClient() as client:
-        tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-        if tree_res.status_code != 200:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-        tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-        files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    try:
+        async with httpx.AsyncClient() as client:
+            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
+            if tree_res.status_code != 200:
+                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
+            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
+            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
 
-        code_context = ""
-        for kf in [f for f in files if f.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.json', '.md'))][:6]:
-            file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-            if file_res.status_code == 200:
-                try:
-                    code_context += f"\n--- FILE: {kf} ---\n{base64.b64decode(file_res.json().get('content', '')).decode('utf-8')[:1200]}\n"
-                except Exception:
-                    pass
+            code_context = ""
+            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp', '.json', '.md')
+            for kf in [f for f in files if f.endswith(target_exts)][:6]:
+                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
+                if file_res.status_code == 200:
+                    try:
+                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
+                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1200]}\n"
+                    except Exception:
+                        pass
 
-    prompt = f"Explain codebase for {owner}/{repo}. Question: {query}. Context: {code_context}"
-    response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return {"answer": response.text, "indexed_files_count": len(files)}
+        prompt = f"""
+        Developer Preferences: {prefs}
+
+        Previous Conversation History for this Repository:
+        {history}
+
+        Repository Code Context:
+        {code_context}
+
+        Current User Question: "{query}"
+        """
+        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        answer = response.text
+        
+        # Save query and answer to memory
+        save_chat_memory(user, f"{owner}/{repo}", "user", query)
+        save_chat_memory(user, f"{owner}/{repo}", "assistant", answer)
+
+        return {"answer": answer, "indexed_files_count": len(files)}
+    except Exception as e:
+        return {"answer": f"⚠ Query failed: {str(e)}", "indexed_files_count": 0}
 
 if __name__ == "__main__":
     import uvicorn
