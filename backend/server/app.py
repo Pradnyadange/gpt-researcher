@@ -103,13 +103,6 @@ async def save_preferences_api(request: Request):
     conn.close()
     return {"status": "success", "preferences": prefs}
 
-@app.get("/templates/hero-graphic.png")
-async def get_hero_graphic():
-    image_path = os.path.join(BASE_DIR, "templates", "hero-graphic.png")
-    if os.path.exists(image_path):
-        return FileResponse(image_path)
-    raise HTTPException(status_code=404, detail="Graphic not found")
-
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, error: str = None):
     return templates.TemplateResponse(request, "index.html", {"request": request, "error": error})
@@ -357,8 +350,8 @@ async def semantic_search(request: Request):
     except Exception as e:
         return {"results": f"⚠️ Semantic search failed: {str(e)}"}
 
-@app.post("/api/codebase/query")
-async def codebase_query(request: Request):
+@app.post("/api/agent/query")
+async def multi_step_agent_query(request: Request):
     token = request.session.get("github_token")
     if not token:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -378,40 +371,49 @@ async def codebase_query(request: Request):
             if tree_res.status_code != 200:
                 tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
             tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+            file_paths = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+
+            relevant_files = [f for f in file_paths if any(kw in f.lower() for kw in ['main', 'server', 'app', 'router', 'controller', 'index', 'config'])]
+            if not relevant_files:
+                relevant_files = file_paths[:5]
 
             code_context = ""
-            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp', '.json', '.md')
-            for kf in [f for f in files if f.endswith(target_exts)][:6]:
+            for kf in relevant_files[:6]:
                 file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
                 if file_res.status_code == 200:
                     try:
                         decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
-                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1200]}\n"
+                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1500]}\n"
                     except Exception:
                         pass
 
         prompt = f"""
+        [MULTI-STEP AI AGENT MODE]
         Developer Preferences: {prefs}
 
-        Previous Conversation History for this Repository:
+        Previous Repository Conversation:
         {history}
 
-        Repository Code Context:
+        Repository File Structure ({len(file_paths)} files total):
+        {str(file_paths[:40])}
+
+        Retrieved Code Context & Dependencies:
         {code_context}
 
-        Current User Question: "{query}"
+        User Request: "{query}"
+
+        Analyze cross-file relationships, dependencies, and architecture to provide a comprehensive, step-by-step technical response.
         """
+        
         response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         answer = response.text
         
-        # Save query and answer to memory
         save_chat_memory(user, f"{owner}/{repo}", "user", query)
         save_chat_memory(user, f"{owner}/{repo}", "assistant", answer)
 
-        return {"answer": answer, "indexed_files_count": len(files)}
+        return {"answer": answer, "indexed_files_count": len(file_paths)}
     except Exception as e:
-        return {"answer": f"⚠ Query failed: {str(e)}", "indexed_files_count": 0}
+        return {"answer": f"⚠️ Agent execution failed: {str(e)}", "indexed_files_count": 0}
 
 if __name__ == "__main__":
     import uvicorn

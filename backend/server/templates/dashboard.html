@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" data-color-mode="dark">
-
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - DevAgent</title>
@@ -46,533 +45,124 @@
 
         /* Top Header */
         nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-bg);
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg); z-index: 100;
         }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .nav-icon-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-icon-btn:hover {
-            background: var(--badge-bg);
-        }
-
-        .logo {
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-
-        .logo svg {
-            fill: var(--text-main);
-            width: 22px;
-            height: 22px;
-        }
+        .nav-left { display: flex; align-items: center; gap: 16px; }
+        .nav-icon-btn { background: none; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .nav-icon-btn:hover { background: var(--badge-bg); }
+        .logo { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--text-main); text-decoration: none; }
+        .logo svg { fill: var(--text-main); width: 22px; height: 22px; }
 
         .search-bar-top {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            padding: 6px 14px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            width: 320px;
-            color: var(--text-muted);
-            font-size: 13px;
-            gap: 8px;
+            background: var(--bg-color); border: 1px solid var(--border-color);
+            padding: 6px 14px; border-radius: 6px; display: flex; align-items: center; width: 320px; color: var(--text-muted); font-size: 13px; gap: 8px;
         }
+        .search-bar-top kbd { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
 
-        .search-bar-top kbd {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-size: 11px;
-        }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .top-action-icon { background: var(--bg-color); border: 1px solid var(--border-color); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); font-size: 14px; }
+        .top-action-icon:hover { background: var(--badge-bg); }
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .top-action-icon {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-main);
-            font-size: 14px;
-        }
-
-        .top-action-icon:hover {
-            background: var(--badge-bg);
-        }
-
-        .account-avatar-top {
-            width: 28px;
-            height: 28px;
-            background: #8957e5;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .account-avatar-top { width: 28px; height: 28px; background: #8957e5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
 
         /* App Layout Grid */
-        .app-layout {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            height: calc(100vh - 60px);
-            overflow: hidden;
-        }
+        .app-layout { display: grid; grid-template-columns: var(--sidebar-width) 1fr; height: calc(100vh - 60px); overflow: hidden; }
 
         /* Left Sidebar */
-        .sidebar {
-            background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+        .sidebar { background: var(--card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-menu { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--text-main); text-decoration: none; cursor: pointer; }
+        .sidebar-item:hover, .sidebar-item.active { background: var(--badge-bg); }
+        .sidebar-item svg { fill: var(--text-muted); width: 16px; height: 16px; }
 
-        .sidebar-menu {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-main);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: var(--badge-bg);
-        }
-
-        .sidebar-item svg {
-            fill: var(--text-muted);
-            width: 16px;
-            height: 16px;
-        }
-
-        .sidebar-repos-header {
-            padding: 12px 16px 6px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        .sidebar-repos-header { padding: 12px 16px 6px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
         .repo-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 16px;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 10px; padding: 6px 16px; font-size: 12px; color: var(--text-muted);
+            text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
         }
-
-        .repo-nav-item:hover,
-        .repo-nav-item.active {
-            background: var(--badge-bg);
-            color: var(--text-main);
-        }
-
-        .repo-nav-avatar {
-            width: 18px;
-            height: 18px;
-            background: #8957e5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: white;
-            flex-shrink: 0;
-        }
+        .repo-nav-item:hover, .repo-nav-item.active { background: var(--badge-bg); color: var(--text-main); }
+        .repo-nav-avatar { width: 18px; height: 18px; background: #8957e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; flex-shrink: 0; }
 
         /* Main Dashboard Content Area */
-        .main-dashboard {
-            background: var(--bg-color);
-            padding: 30px 40px;
-            overflow-y: auto;
-            display: block;
-        }
-
-        .greeting-title {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--text-main);
-        }
-
+        .main-dashboard { background: var(--bg-color); padding: 30px 40px; overflow-y: auto; display: block; }
+        .greeting-title { font-size: 26px; font-weight: 600; margin-bottom: 20px; color: var(--text-main); }
+        
         /* Copilot Prompt Box */
         .copilot-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
-
         .copilot-textarea {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 14px;
-            outline: none;
-            resize: none;
-            min-height: 50px;
-            font-family: inherit;
+            width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 14px; outline: none; resize: none; min-height: 50px; font-family: inherit;
         }
-
-        .copilot-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .copilot-tools-left,
-        .copilot-tools-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .copilot-pill {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: var(--text-main);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .copilot-pill:hover {
-            background: var(--badge-bg);
-        }
+        .copilot-toolbar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px; flex-wrap: wrap; gap: 8px; }
+        .copilot-tools-left, .copilot-tools-right { display: flex; align-items: center; gap: 8px; }
+        .copilot-pill { background: var(--bg-color); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 12px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .copilot-pill:hover { background: var(--badge-bg); }
 
         /* Action Pills Row */
-        .action-pills-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-        }
-
+        .action-pills-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
         .action-pill-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-main);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: var(--card-bg); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px;
+            font-size: 12px; font-weight: 500; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 8px;
             transition: border-color 0.2s;
         }
-
-        .action-pill-btn:hover {
-            border-color: #3fb950;
-            background: var(--badge-bg);
-        }
+        .action-pill-btn:hover { border-color: #3fb950; background: var(--badge-bg); }
 
         /* Code Explorer Component */
         .explorer-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: none;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+            margin-bottom: 30px; display: none; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
-
         .explorer-header {
-            padding: 14px 20px;
-            background: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: #58a6ff;
+            padding: 14px 20px; background: var(--bg-color); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: #58a6ff;
         }
+        .explorer-body { display: grid; grid-template-columns: 300px 1fr; height: 500px; }
+        .file-tree { border-right: 1px solid var(--border-color); overflow-y: auto; padding: 12px; background: var(--bg-color); font-family: monospace; font-size: 12px; }
+        
+        .tree-folder { margin-bottom: 4px; }
+        .tree-folder-title { padding: 6px 8px; cursor: pointer; border-radius: 6px; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .tree-folder-title:hover { background: var(--badge-bg); }
+        .tree-folder-content { padding-left: 16px; display: none; border-left: 1px dashed var(--border-color); margin-left: 8px; margin-top: 2px; }
+        .tree-folder.open > .tree-folder-content { display: block; }
+        
+        .tree-file { padding: 5px 8px; cursor: pointer; border-radius: 6px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+        .tree-file:hover { background: var(--badge-bg); color: var(--text-main); }
+        .tree-file.active { background: rgba(35,134,54,0.15); color: #3fb950; font-weight: 600; }
 
-        .explorer-body {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            height: 500px;
-        }
-
-        .file-tree {
-            border-right: 1px solid var(--border-color);
-            overflow-y: auto;
-            padding: 12px;
-            background: var(--bg-color);
-            font-family: monospace;
-            font-size: 12px;
-        }
-
-        .tree-folder {
-            margin-bottom: 4px;
-        }
-
-        .tree-folder-title {
-            padding: 6px 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: var(--text-main);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tree-folder-title:hover {
-            background: var(--badge-bg);
-        }
-
-        .tree-folder-content {
-            padding-left: 16px;
-            display: none;
-            border-left: 1px dashed var(--border-color);
-            margin-left: 8px;
-            margin-top: 2px;
-        }
-
-        .tree-folder.open>.tree-folder-content {
-            display: block;
-        }
-
-        .tree-file {
-            padding: 5px 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tree-file:hover {
-            background: var(--badge-bg);
-            color: var(--text-main);
-        }
-
-        .tree-file.active {
-            background: rgba(35, 134, 54, 0.15);
-            color: #3fb950;
-            font-weight: 600;
-        }
-
-        .code-viewer {
-            display: flex;
-            flex-direction: column;
-            background: var(--code-bg);
-            overflow: hidden;
-        }
-
-        .code-viewer-header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            color: var(--text-muted);
-        }
-
-        .code-viewer pre {
-            margin: 0;
-            padding: 16px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #f0f6fc;
-            overflow: auto;
-            flex: 1;
-            user-select: text;
-        }
+        .code-viewer { display: flex; flex-direction: column; background: var(--code-bg); overflow: hidden; }
+        .code-viewer-header { padding: 10px 16px; border-bottom: 1px solid var(--border-color); font-size: 12px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); color: var(--text-muted); }
+        .code-viewer pre { margin: 0; padding: 16px; font-family: monospace; font-size: 12px; color: #f0f6fc; overflow: auto; flex: 1; user-select: text; }
 
         /* Formatted Report Styling */
-        .formatted-report h3 {
-            color: #58a6ff;
-            font-size: 14px;
-            margin-top: 14px;
-            margin-bottom: 6px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 4px;
-        }
-
-        .formatted-report p {
-            margin: 4px 0;
-            color: var(--text-main);
-        }
-
-        .formatted-report ul {
-            margin: 4px 0;
-            padding-left: 18px;
-        }
-
-        .formatted-report li {
-            margin-bottom: 4px;
-            color: var(--text-main);
-        }
-
-        .formatted-report strong {
-            color: #3fb950;
-        }
+        .formatted-report h3 { color: #58a6ff; font-size: 14px; margin-top: 14px; margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+        .formatted-report p { margin: 4px 0; color: var(--text-main); }
+        .formatted-report ul { margin: 4px 0; padding-left: 18px; }
+        .formatted-report li { margin-bottom: 4px; color: var(--text-main); }
+        .formatted-report strong { color: #3fb950; }
 
         /* Modals */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); z-index: 1000;
+            justify-content: center; align-items: center;
         }
-
         .modal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            width: 850px;
-            max-width: 92%;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            position: relative;
-            max-height: 85vh;
-            overflow-y: auto;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            width: 850px; max-width: 92%; border-radius: 14px; padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; max-height: 85vh; overflow-y: auto;
         }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-color);
-            padding-top: 16px;
-            margin-top: 16px;
-        }
-
-        .btn-main {
-            background: var(--accent-green);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .btn-main:hover {
-            background: var(--accent-green-hover);
-        }
-
-        .btn-secondary {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 11px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-secondary:hover {
-            background: var(--badge-bg);
-        }
+        .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
+        .modal-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px; }
+        .btn-main { background: var(--accent-green); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+        .btn-main:hover { background: var(--accent-green-hover); }
+        .btn-secondary { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; text-decoration: none; }
+        .btn-secondary:hover { background: var(--badge-bg); }
     </style>
 </head>
-
 <body>
 
     <!-- Top Navigation Bar -->
@@ -580,11 +170,7 @@
         <div class="nav-left">
             <button class="nav-icon-btn">☰</button>
             <a href="/dashboard" class="logo">
-                <svg height="24" viewBox="0 0 16 16" width="24">
-                    <path
-                        d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z">
-                    </path>
-                </svg>
+                <svg height="24" viewBox="0 0 16 16" width="24"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
                 Dashboard
             </a>
         </div>
@@ -592,8 +178,7 @@
             <span>🔍</span> Type <kbd>/</kbd> to search
         </div>
         <div class="nav-right">
-            <div class="top-action-icon" onclick="openPreferencesModal()" title="Developer Preferences & Memory">⚙️
-            </div>
+            <div class="top-action-icon" onclick="openPreferencesModal()" title="Developer Preferences & Memory">⚙️</div>
             <div class="account-avatar-top" onclick="window.location.href='/'" title="Sign out">PD</div>
         </div>
     </nav>
@@ -604,23 +189,15 @@
         <div class="sidebar">
             <div class="sidebar-menu">
                 <a href="/dashboard" class="sidebar-item active">
-                    <svg viewBox="0 0 16 16">
-                        <path
-                            d="M6.906.664a1.74 1.74 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.532.242-1.035.657-1.367l5.25-4.2Z">
-                        </path>
-                    </svg>
+                    <svg viewBox="0 0 16 16"><path d="M6.906.664a1.74 1.74 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.532.242-1.035.657-1.367l5.25-4.2Z"></path></svg>
                     Home
                 </a>
                 <a href="#" class="sidebar-item">
-                    <svg viewBox="0 0 16 16">
-                        <path
-                            d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z">
-                        </path>
-                    </svg>
+                    <svg viewBox="0 0 16 16"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg>
                     Feed
                 </a>
             </div>
-
+            
             <div class="sidebar-repos-header">
                 <span>Top repositories</span>
                 <span>🔍</span>
@@ -636,24 +213,20 @@
 
             <!-- Copilot Prompt Box -->
             <div class="copilot-box">
-                <textarea id="copilotPromptInput" class="copilot-textarea"
-                    placeholder="Ask anything or type @ to contextually query code..."></textarea>
+                <textarea id="copilotPromptInput" class="copilot-textarea" placeholder="Ask anything or type @ to contextually query code..."></textarea>
                 <div class="copilot-toolbar">
                     <div class="copilot-tools-left">
                         <div class="copilot-pill">⚡ Auto ▾</div>
                         <div class="copilot-pill">Optimized for: Balance ▾</div>
                     </div>
                     <div class="copilot-tools-right">
-                        <div class="copilot-pill" id="selectedRepoContextLabel" onclick="toggleRepoDropdown()"
-                            style="position: relative;">
+                        <div class="copilot-pill" id="selectedRepoContextLabel" onclick="toggleRepoDropdown()" style="position: relative;">
                             📂 Select Repository ▾
-                            <div id="repoDropdownMenu"
-                                style="display: none; position: absolute; left: 0; top: 35px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 240px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                            <div id="repoDropdownMenu" style="display: none; position: absolute; left: 0; top: 35px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 240px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
                                 <!-- Populated dynamically -->
                             </div>
                         </div>
-                        <button class="btn-main" type="button" onclick="sendCopilotQuery()"
-                            style="display: flex; align-items: center; gap: 4px; cursor: pointer;">Ask AI ➔</button>
+                        <button class="btn-main" type="button" onclick="sendCopilotQuery()" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">Ask AI ➔</button>
                     </div>
                 </div>
             </div>
@@ -662,10 +235,8 @@
             <div class="action-pills-row">
                 <button class="action-pill-btn" onclick="openActiveRepoModal('smells')">🔍 Debug Code Smells</button>
                 <button class="action-pill-btn" onclick="openActiveRepoModal('readme')">📖 README Analyser</button>
-                <button class="action-pill-btn" onclick="openActiveRepoModal('semantic')">🧠 RAG Semantic
-                    Search</button>
-                <button class="action-pill-btn" onclick="openActiveRepoModal('overview')">⚡ AI Repository
-                    Overview</button>
+                <button class="action-pill-btn" onclick="openActiveRepoModal('semantic')">🧠 RAG Semantic Search</button>
+                <button class="action-pill-btn" onclick="openActiveRepoModal('overview')">⚡ AI Repository Overview</button>
             </div>
 
             <!-- Code Explorer Component -->
@@ -681,8 +252,7 @@
                     <div class="code-viewer">
                         <div class="code-viewer-header">
                             <span id="currentFilePath">No file selected</span>
-                            <button class="btn-main" style="padding: 4px 10px; font-size: 11px;"
-                                onclick="askAiAboutSelectedCode()">Ask AI about selected code</button>
+                            <button class="btn-main" style="padding: 4px 10px; font-size: 11px;" onclick="askAiAboutSelectedCode()">Ask AI about selected code</button>
                         </div>
                         <pre id="codeContent">Select a folder, expand it, and click any file to view source code.</pre>
                     </div>
@@ -690,8 +260,7 @@
             </div>
 
             <!-- Execution Logs & Results -->
-            <div id="result-container"
-                style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 20px; border-radius: 8px; display: none; margin-bottom: 40px;">
+            <div id="result-container" style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 20px; border-radius: 8px; display: none; margin-bottom: 40px;">
                 <div id="report-content" class="formatted-report"></div>
             </div>
         </div>
@@ -702,12 +271,8 @@
         <div class="modal-card" style="width: 600px;">
             <button class="modal-close" onclick="closePreferencesModal()">✕</button>
             <h2 style="color: #58a6ff; font-size: 16px; margin-top: 0;">⚙️ Developer Preferences & Memory</h2>
-            <p style="font-size: 12px; color: var(--text-muted);">Set your coding style, preferred frameworks, and
-                architectural rules. DevAgent remembers and applies these automatically across all code reviews and AI
-                answers.</p>
-            <textarea id="preferencesInput" class="copilot-textarea"
-                style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; min-height: 140px; margin-bottom: 16px;"
-                placeholder="e.g. Always use C++20 standard, prefer clean modular classes, use async/await in Python FastAPI..."></textarea>
+            <p style="font-size: 12px; color: var(--text-muted);">Set your coding style, preferred frameworks, and architectural rules. DevAgent remembers and applies these automatically across all code reviews and AI answers.</p>
+            <textarea id="preferencesInput" class="copilot-textarea" style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; min-height: 140px; margin-bottom: 16px;" placeholder="e.g. Always use C++20 standard, prefer clean modular classes, use async/await in Python FastAPI..."></textarea>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closePreferencesModal()">Cancel</button>
                 <button class="btn-main" onclick="saveDeveloperPreferences()">Save Preferences</button>
@@ -720,8 +285,7 @@
         <div class="modal-card">
             <button class="modal-close" onclick="closeFeatureModal()">✕</button>
             <h2 id="modalFeatureTitle" style="color: #58a6ff; font-size: 16px; margin-top: 0;">Feature Output</h2>
-            <div id="modalFeatureBody" class="formatted-report"
-                style="font-size: 13px; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
+            <div id="modalFeatureBody" class="formatted-report" style="font-size: 13px; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
                 Processing...
             </div>
             <div class="modal-footer">
@@ -767,11 +331,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ preferences: prefs })
             })
-                .then(res => res.json())
-                .then(data => {
-                    alert("Developer preferences saved and remembered successfully!");
-                    closePreferencesModal();
-                });
+            .then(res => res.json())
+            .then(data => {
+                alert("Developer preferences saved and remembered successfully!");
+                closePreferencesModal();
+            });
         }
 
         function toggleRepoDropdown() {
@@ -779,7 +343,7 @@
             menu.style.display = menu.style.display === "block" ? "none" : "block";
         }
 
-        window.onclick = function (event) {
+        window.onclick = function(event) {
             if (event.target == document.getElementById("featureModal")) closeFeatureModal();
             if (event.target == document.getElementById("preferencesModal")) closePreferencesModal();
             if (!event.target.closest('#selectedRepoContextLabel')) {
@@ -832,7 +396,7 @@
         function selectRepository(fullName) {
             currentSelectedRepo = fullName;
             document.getElementById("selectedRepoContextLabel").innerHTML = `📂 ${fullName} ▾ <div id="repoDropdownMenu" style="display: none; position: absolute; left: 0; top: 35px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 240px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);"></div>`;
-
+            
             // Highlight active sidebar item
             document.querySelectorAll('.repo-nav-item').forEach(el => el.classList.remove('active'));
             const activeEl = document.getElementById(`sidebar-repo-${fullName.replace('/', '-')}`);
@@ -947,7 +511,7 @@
         function sendCopilotQuery() {
             const inputEl = document.getElementById("copilotPromptInput");
             const query = inputEl ? inputEl.value.trim() : "";
-
+            
             if (!query) {
                 alert("Please enter a question or request in the prompt box first.");
                 return;
@@ -960,31 +524,31 @@
             const [owner, repo] = currentSelectedRepo.split("/");
             const resultContainer = document.getElementById("result-container");
             const reportContent = document.getElementById("report-content");
-
+            
             if (resultContainer) {
                 resultContainer.style.display = "block";
                 resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            if (reportContent) reportContent.innerHTML = "Querying codebase with Gemini AI (using your saved memory & preferences)...";
+            if (reportContent) reportContent.innerHTML = "🤖 Multi-step AI Agent analyzing repository structure, dependencies, and file relationships...";
 
-            fetch('/api/codebase/query', {
+            fetch('/api/agent/query', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: query, owner: owner, repo: repo })
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (reportContent) reportContent.innerHTML = formatMarkdownToHtml(data.answer);
-                })
-                .catch(err => {
-                    if (reportContent) reportContent.innerHTML = "⚠️ Error communicating with server.";
-                });
+            .then(res => res.json())
+            .then(data => {
+                if (reportContent) reportContent.innerHTML = formatMarkdownToHtml(data.answer);
+            })
+            .catch(err => {
+                if (reportContent) reportContent.innerHTML = "⚠️ Error communicating with agent server.";
+            });
         }
 
         function openActiveRepoModal(type) {
             if (!currentSelectedRepo) { alert("Please select a repository first."); return; }
             const [owner, repo] = currentSelectedRepo.split("/");
-
+            
             let title = "";
             let endpoint = "";
 
@@ -1004,15 +568,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-                .then(res => res.json())
-                .then(data => {
-                    const text = data.analysis || data.results || JSON.stringify(data, null, 2);
-                    modalLatestText = text;
-                    document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(text);
-                })
-                .catch(err => {
-                    document.getElementById("modalFeatureBody").innerHTML = "Error performing analysis.";
-                });
+            .then(res => res.json())
+            .then(data => {
+                const text = data.analysis || data.results || JSON.stringify(data, null, 2);
+                modalLatestText = text;
+                document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(text);
+            })
+            .catch(err => {
+                document.getElementById("modalFeatureBody").innerHTML = "Error performing analysis.";
+            });
         }
 
         function copyModalContent() {
@@ -1031,5 +595,4 @@
         }
     </script>
 </body>
-
 </html>
