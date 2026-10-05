@@ -1,21 +1,22 @@
 # 🤖 DevAgent: AI-Powered GitHub Developer Agent
 
-DevAgent is an intelligent, context-aware developer copilot and repository manager built with FastAPI, Google Gemini AI, and SQLite. It bridges the gap between static code hosting and dynamic, personalized AI development workflows.
+DevAgent is an intelligent, context-aware developer copilot and repository manager built with FastAPI, Google Gemini AI (`gemini-2.5-flash`), and SQLite. It bridges the gap between static code hosting and dynamic, personalized AI development workflows.
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features & Architecture
 
-* **🧠 Persistent Repository Memory & Chat History:** Remembers past conversation threads and context for each individual repository so you never have to re-explain your architecture.
-* **⚙️ Customizable Developer Preferences:** Set your preferred coding standards (e.g., C++20 guidelines, asynchronous patterns, clean architecture rules), and DevAgent automatically applies them to all code reviews and AI answers.
+* **🤖 Multi-Step AI Agent:** Automatically inspects repository file trees, identifies core architecture and routing files, retrieves cross-file dependencies, and executes multi-stage reasoning to answer complex technical requests.
+* **🧠 Persistent Repository Memory & Chat History:** Remembers past conversation threads and context for each individual repository using a local SQLite database (`devagent_memory.db`), ensuring continuous conversational state across sessions.
+* **⚙️ Customizable Developer Preferences:** Define your preferred coding standards (e.g., C++20 modern guidelines, asynchronous patterns, clean architecture rules), and DevAgent automatically injects and applies them to all code reviews and AI answers.
 * **🔍 RAG-Powered Semantic Code Search:** Go beyond basic keyword matching. Query your codebase by intent and meaning to find relevant logic instantly.
 * **🧹 Automated Code Smell Audits:** Instantly scan core files for long functions, duplicate logic, naming anti-patterns, and error handling bottlenecks.
 * **📖 README & Documentation Analyser:** Evaluate existing documentation quality and automatically generate missing sections or complete professional README files.
-* **📂 Interactive Code Explorer:** Browse folder trees, view source files directly in a clean dark/light UI, and click **"Ask AI about selected code"** for deep file explanations.
+* **📂 Interactive Code Explorer:** Browse folder trees, view source files directly in a clean dark/light UI, and click **"Ask AI about selected code"** for deep file explanations with instant auto-scrolling query results.
 
 ---
 
-## ⚡ How DevAgent is Different from Traditional GitHub 
+## ⚡ How DevAgent is Different from Traditional GitHub
 
 | Feature / Capability | Traditional GitHub | DevAgent (AI Developer Agent) |
 | :--- | :--- | :--- |
@@ -28,7 +29,7 @@ DevAgent is an intelligent, context-aware developer copilot and repository manag
 
 ## 🛠️ Tech Stack
 
-* **Backend:** Python 3.14, FastAPI, Uvicorn, SQLite
+* **Backend:** Python 3.14, FastAPI, Uvicorn, SQLite (`devagent_memory.db`)
 * **AI Engine:** Google Gemini SDK (`gemini-2.5-flash`)
 * **API Integration:** GitHub REST API v3, HTTPX
 * **Frontend:** Jinja2 Templates, HTML5, CSS3, Modern JavaScript (GitHub Dark/Light theme UI)
