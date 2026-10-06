@@ -350,6 +350,72 @@ async def semantic_search(request: Request):
     except Exception as e:
         return {"results": f"⚠️ Semantic search failed: {str(e)}"}
 
+@app.post("/api/repo/simulate-impact")
+async def simulate_change_impact(request: Request):
+    token = request.session.get("github_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    body = await request.json()
+    owner, repo, target_symbol = body.get("owner"), body.get("repo"), body.get("symbol", "")
+    user = request.session.get("github_user", "default_user")
+    prefs = get_user_preferences(user)
+    
+    if not target_symbol:
+        return {"analysis": "Please provide a function or component name to simulate impact for."}
+    
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
+            if tree_res.status_code != 200:
+                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
+            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
+            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+
+            code_context = ""
+            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp')
+            for kf in [f for f in files if f.endswith(target_exts)][:8]:
+                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
+                if file_res.status_code == 200:
+                    try:
+                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
+                        if target_symbol.lower() in decoded.lower():
+                            code_context += f"\n--- MATCH FILE: {kf} ---\n{decoded[:1500]}\n"
+                    except Exception:
+                        pass
+
+        if not code_context:
+            code_context = "Target symbol not explicitly found in quick scan, analyzing general project structure."
+
+        # Beginner-friendly prompt instruction
+        prompt = f"""
+        [CHANGE IMPACT SIMULATOR - BEGINNER FRIENDLY]
+        Developer Preferences: {prefs}
+        Target Function/Symbol to Modify: "{target_symbol}"
+        Repository: {owner}/{repo}
+
+        Code Snippets Referencing Target:
+        {code_context}
+
+        Analyze the potential blast radius if this function or symbol is changed. 
+        Write the explanation in a clear, easy-to-understand style suitable for beginners or mixed teams. Use simple language, practical explanations, and bullet points instead of overly dense developer jargon.
+        
+        Structure your markdown response under these exact headings:
+        ### 1. Affected Files (Which files will feel the ripple effect)
+        ### 2. Affected Functions (Which helper methods rely on this)
+        ### 3. APIs (Which website routes or connections might break)
+        ### 4. Database (Any data tables or settings impacted)
+        ### 5. Tests (Which automated checks need updating)
+        ### 6. Dependencies (Other connected modules or packages)
+        """
+        
+        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        return {"analysis": response.text}
+    except Exception as e:
+        return {"analysis": f"⚠️ Impact simulation failed: {str(e)}"}
+
 @app.post("/api/agent/query")
 async def multi_step_agent_query(request: Request):
     token = request.session.get("github_token")
