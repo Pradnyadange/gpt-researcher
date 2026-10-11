@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import httpx
 from google import genai
 
-app = FastAPI(title="DevAgent - AI GitHub Developer Agent")
+app = FastAPI(title="DevAgent - Ultimate AI GitHub Developer Agent")
 
 app.add_middleware(SessionMiddleware, secret_key="devagent-super-secret-key-change-in-production")
 
@@ -19,7 +19,6 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 GITHUB_API_URL = "https://api.github.com"
 client_ai = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Initialize Local SQLite Memory & Preferences Database
 DB_PATH = os.path.join(BASE_DIR, "devagent_memory.db")
 
 def init_db():
@@ -114,7 +113,6 @@ async def login(request: Request, token: str = Form(...)):
             f"{GITHUB_API_URL}/user",
             headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
         )
-    
     if response.status_code != 200:
         return templates.TemplateResponse(request, "index.html", {"request": request, "error": "Invalid Personal Access Token."})
     
@@ -132,354 +130,170 @@ async def dashboard(request: Request):
 @app.get("/api/repos")
 async def get_user_repos(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{GITHUB_API_URL}/user/repos",
             headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"},
-            params={"sort": "updated", "per_page": 50, "affiliation": "owner,collaborator,organization_member"}
+            params={"sort": "updated", "per_page": 50}
         )
-    
-    if response.status_code != 200:
-        return {"repositories": []}
-    
+    if response.status_code != 200: return {"repositories": []}
     repos = response.json()
-    formatted_repos = [{
-        "name": repo.get("name"),
-        "full_name": repo.get("full_name"),
-        "description": repo.get("description"),
-        "private": repo.get("private"),
-        "language": repo.get("language") or "Mixed",
-        "updated_at": repo.get("updated_at")
-    } for repo in repos]
-    
-    return {"repositories": formatted_repos}
-
-@app.get("/api/repo/overview")
-async def get_repo_overview(request: Request, owner: str, repo: str):
-    token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    async with httpx.AsyncClient() as client:
-        repo_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}", headers=headers)
-        if repo_res.status_code != 200:
-            raise HTTPException(status_code=404, detail="Repository not found")
-        repo_data = repo_res.json()
-        
-        lang_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/languages", headers=headers)
-        languages = lang_res.json() if lang_res.status_code == 200 else {}
-        
-        dependencies = []
-        for dep_file in ["package.json", "requirements.txt", "Cargo.toml", "pom.xml", "go.mod", "CMakeLists.txt"]:
-            file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{dep_file}", headers=headers)
-            if file_res.status_code == 200:
-                try:
-                    content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
-                    dependencies.append({"file": dep_file, "snippet": content[:400]})
-                except Exception:
-                    pass
-
-    description = repo_data.get("description") or "No description provided."
-    dep_text = str(dependencies).lower()
-    frameworks = []
-    if "fastapi" in dep_text: frameworks.append("FastAPI")
-    if "flask" in dep_text: frameworks.append("Flask")
-    if "react" in dep_text or "next" in dep_text: frameworks.append("Next.js / React")
-    if "express" in dep_text: frameworks.append("Node.js Express")
-    if "drogon" in dep_text: frameworks.append("Drogon C++ Web Framework")
-    if not frameworks: frameworks.append("Core Modular Architecture")
-
-    return {
-        "name": repo_data.get("name"),
-        "full_name": repo_data.get("full_name"),
-        "private": repo_data.get("private"),
-        "what_it_does": description,
-        "tech_stack": list(languages.keys())[:5],
-        "languages": languages,
-        "frameworks": frameworks,
-        "dependencies": [d["file"] for d in dependencies] if dependencies else ["None detected"]
-    }
+    return {"repositories": [{"name": r.get("name"), "full_name": r.get("full_name"), "description": r.get("description"), "private": r.get("private"), "language": r.get("language") or "Mixed"} for r in repos]}
 
 @app.get("/api/repo/tree")
 async def get_repo_tree(request: Request, owner: str, repo: str):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     async with httpx.AsyncClient() as client:
         tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
         if tree_res.status_code != 200:
             tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-        if tree_res.status_code != 200:
-            return {"files": []}
-        tree_data = tree_res.json()
-        files = [{"path": item["path"], "type": item["type"]} for item in tree_data.get("tree", []) if item["type"] in ["blob", "tree"]]
+        if tree_res.status_code != 200: return {"files": []}
+        files = [{"path": item["path"], "type": item["type"]} for item in tree_res.json().get("tree", []) if item["type"] in ["blob", "tree"]]
     return {"files": files}
 
 @app.get("/api/repo/file")
 async def get_repo_file_content(request: Request, owner: str, repo: str, path: str):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     async with httpx.AsyncClient() as client:
         file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{path}", headers=headers)
-        if file_res.status_code != 200:
-            raise HTTPException(status_code=404, detail="File not found")
-        try:
-            content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
-        except Exception:
-            content = "Binary or unreadable file content."
+        if file_res.status_code != 200: raise HTTPException(status_code=404, detail="File not found")
+        try: content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
+        except Exception: content = "Binary file."
     return {"path": path, "content": content}
 
-@app.post("/api/repo/analyze-readme")
-async def analyze_readme(request: Request):
+# --- ADVANCED AGENT FEATURE ENDPOINTS ---
+
+@app.post("/api/repo/issue-mapping")
+async def issue_mapping(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo, issue = body.get("owner"), body.get("repo"), body.get("issue", "")
+    prompt = f"[ISSUE -> CODE MAPPING]\nRepo: {owner}/{repo}\nGitHub Issue: '{issue}'\nFind and list the exact files and functions responsible for this issue."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
+
+@app.post("/api/repo/issue-solver")
+async def issue_solver(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo, issue = body.get("owner"), body.get("repo"), body.get("issue", "")
+    prompt = f"[ISSUE SOLVER AGENT]\nRepo: {owner}/{repo}\nIssue: '{issue}'\nUnderstand issue, locate relevant code, and build a complete step-by-step implementation plan with code snippets."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
+
+@app.post("/api/repo/pr-review")
+async def pr_review(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo, pr_number = body.get("owner"), body.get("repo"), body.get("pr_number", "latest")
+    prompt = f"[PR REVIEW AGENT]\nRepo: {owner}/{repo}\nReview Pull Request #{pr_number}, find bugs, check architecture, and suggest improvements."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
+
+@app.post("/api/repo/commit-analyzer")
+async def commit_analyzer(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     body = await request.json()
     owner, repo = body.get("owner"), body.get("repo")
-    user = request.session.get("github_user", "default_user")
-    prefs = get_user_preferences(user)
     
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+    async with httpx.AsyncClient() as client:
+        c_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/commits?per_page=5", headers=headers)
+        commits = c_res.json() if c_res.status_code == 200 else []
     
-    try:
-        async with httpx.AsyncClient() as client:
-            repo_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}", headers=headers)
-            repo_data = repo_res.json() if repo_res.status_code == 200 else {}
-            
-            readme_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/readme", headers=headers)
-            readme_content = ""
-            if readme_res.status_code == 200:
-                try:
-                    readme_content = base64.b64decode(readme_res.json().get("content", "")).decode("utf-8", errors='ignore')
-                except Exception:
-                    pass
+    prompt = f"[AI COMMIT ANALYZER]\nRecent Commits: {str(commits[:3])}\nExplain what these commits changed and detect potentially dangerous modifications."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-        prompt = f"Developer Preferences: {prefs}\n\nAnalyze README quality, missing sections, and generate an improved README.md for {owner}/{repo}. Description: {repo_data.get('description')}. Current README: {readme_content}"
-        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        return {"analysis": response.text}
-    except Exception as e:
-        return {"analysis": f"⚠️ Analysis failed: {str(e)}"}
-
-@app.post("/api/repo/code-smells")
-async def analyze_code_smells(request: Request):
+@app.post("/api/repo/commit-risk")
+async def commit_risk(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     body = await request.json()
     owner, repo = body.get("owner"), body.get("repo")
-    user = request.session.get("github_user", "default_user")
-    prefs = get_user_preferences(user)
-    
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-            if tree_res.status_code != 200:
-                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    prompt = f"[COMMIT RISK PREDICTION]\nAnalyze repository {owner}/{repo} and provide a risk score (Low/Medium/High) based on affected core components."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-            code_context = ""
-            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp')
-            for kf in [f for f in files if f.endswith(target_exts)][:5]:
-                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-                if file_res.status_code == 200:
-                    try:
-                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
-                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1200]}\n"
-                    except Exception:
-                        pass
-
-        if not code_context:
-            code_context = "No readable source files found."
-
-        prompt = f"Developer Preferences: {prefs}\n\nAnalyze code smells (Long Functions, Duplicate Code, Naming Problems, Error Handling) for {owner}/{repo}:\n{code_context}"
-        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        return {"analysis": response.text}
-    except Exception as e:
-        return {"analysis": f"⚠️ Code smells analysis failed: {str(e)}"}
-
-@app.post("/api/repo/semantic-search")
-async def semantic_search(request: Request):
+@app.post("/api/repo/dependency-analyzer")
+async def dependency_analyzer(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     body = await request.json()
-    owner, repo, query = body.get("owner"), body.get("repo"), body.get("query", "")
-    if not query:
-        return {"results": "Please provide a search query."}
-    
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    try:
-        async with httpx.AsyncClient() as client:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-            if tree_res.status_code != 200:
-                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    owner, repo = body.get("owner"), body.get("repo")
+    prompt = f"[DEPENDENCY ANALYZER]\nMap package/library dependencies for {owner}/{repo} and identify outdated or risky dependencies."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-            code_chunks = []
-            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp', '.md')
-            for kf in [f for f in files if f.endswith(target_exts)][:10]:
-                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-                if file_res.status_code == 200:
-                    try:
-                        content = base64.b64decode(file_res.json().get("content", "")).decode("utf-8", errors='ignore')
-                        for i in range(0, len(content), 800):
-                            if len(content[i:i+800].strip()) > 50:
-                                code_chunks.append({"path": kf, "snippet": content[i:i+800]})
-                    except Exception:
-                        pass
-
-        prompt = f"Semantic RAG Search. Intent: '{query}'. Chunks: {str(code_chunks[:20])}. Select top matching code chunks by meaning."
-        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        return {"results": response.text}
-    except Exception as e:
-        return {"results": f"⚠️ Semantic search failed: {str(e)}"}
-
-@app.post("/api/repo/simulate-impact")
-async def simulate_change_impact(request: Request):
+@app.post("/api/repo/architecture-visualizer")
+async def architecture_visualizer(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     body = await request.json()
-    owner, repo, target_symbol = body.get("owner"), body.get("repo"), body.get("symbol", "")
-    user = request.session.get("github_user", "default_user")
-    prefs = get_user_preferences(user)
-    
-    if not target_symbol:
-        return {"analysis": "Please provide a function or component name to simulate impact for."}
-    
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-            if tree_res.status_code != 200:
-                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-            files = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
+    owner, repo = body.get("owner"), body.get("repo")
+    prompt = f"""[ARCHITECTURE VISUALIZER]
+    Generate an architecture diagram breakdown for {owner}/{repo}. 
+    IMPORTANT: Provide valid Mermaid.js code inside a ```mermaid ... ``` code block. Do not use any HTML tags like <br> inside the mermaid block.
+    """
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-            code_context = ""
-            target_exts = ('.py', '.js', '.ts', '.java', '.cpp', '.cc', '.h', '.hpp')
-            for kf in [f for f in files if f.endswith(target_exts)][:8]:
-                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-                if file_res.status_code == 200:
-                    try:
-                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
-                        if target_symbol.lower() in decoded.lower():
-                            code_context += f"\n--- MATCH FILE: {kf} ---\n{decoded[:1500]}\n"
-                    except Exception:
-                        pass
+@app.post("/api/repo/relationship-graph")
+async def relationship_graph(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo = body.get("owner"), body.get("repo")
+    prompt = f"""[CODEBASE RELATIONSHIP GRAPH]
+    Map flow: API -> Service -> Database -> External API for {owner}/{repo}.
+    IMPORTANT: Provide valid Mermaid.js code inside a ```mermaid ... ``` code block. Do not use any HTML tags like <br> inside the mermaid block.
+    """
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-        if not code_context:
-            code_context = "Target symbol not explicitly found in quick scan, analyzing general project structure."
+@app.post("/api/repo/performance-investigator")
+async def performance_investigator(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo = body.get("owner"), body.get("repo")
+    prompt = f"[PERFORMANCE INVESTIGATOR]\nFind potentially expensive operations, identify bottlenecks, and suggest optimizations for {owner}/{repo}."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
-        # Beginner-friendly prompt instruction
-        prompt = f"""
-        [CHANGE IMPACT SIMULATOR - BEGINNER FRIENDLY]
-        Developer Preferences: {prefs}
-        Target Function/Symbol to Modify: "{target_symbol}"
-        Repository: {owner}/{repo}
-
-        Code Snippets Referencing Target:
-        {code_context}
-
-        Analyze the potential blast radius if this function or symbol is changed. 
-        Write the explanation in a clear, easy-to-understand style suitable for beginners or mixed teams. Use simple language, practical explanations, and bullet points instead of overly dense developer jargon.
-        
-        Structure your markdown response under these exact headings:
-        ### 1. Affected Files (Which files will feel the ripple effect)
-        ### 2. Affected Functions (Which helper methods rely on this)
-        ### 3. APIs (Which website routes or connections might break)
-        ### 4. Database (Any data tables or settings impacted)
-        ### 5. Tests (Which automated checks need updating)
-        ### 6. Dependencies (Other connected modules or packages)
-        """
-        
-        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        return {"analysis": response.text}
-    except Exception as e:
-        return {"analysis": f"⚠️ Impact simulation failed: {str(e)}"}
+@app.post("/api/repo/refactoring-suggestions")
+async def refactoring_suggestions(request: Request):
+    token = request.session.get("github_token")
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
+    body = await request.json()
+    owner, repo = body.get("owner"), body.get("repo")
+    prompt = f"[AI REFACTORING SUGGESTIONS]\nSuggest how to restructure problematic code in {owner}/{repo} and explain why."
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    return {"analysis": res.text}
 
 @app.post("/api/agent/query")
-async def multi_step_agent_query(request: Request):
+async def agent_query(request: Request):
     token = request.session.get("github_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
+    if not token: raise HTTPException(status_code=401, detail="Unauthorized")
     body = await request.json()
     query, owner, repo = body.get("query", ""), body.get("owner"), body.get("repo")
     user = request.session.get("github_user", "default_user")
-    
     prefs = get_user_preferences(user)
-    history = get_chat_memory(user, f"{owner}/{repo}", limit=5)
     
-    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/main?recursive=1", headers=headers)
-            if tree_res.status_code != 200:
-                tree_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/git/trees/master?recursive=1", headers=headers)
-            tree_data = tree_res.json() if tree_res.status_code == 200 else {}
-            file_paths = [item["path"] for item in tree_data.get("tree", []) if item["type"] == "blob"]
-
-            relevant_files = [f for f in file_paths if any(kw in f.lower() for kw in ['main', 'server', 'app', 'router', 'controller', 'index', 'config'])]
-            if not relevant_files:
-                relevant_files = file_paths[:5]
-
-            code_context = ""
-            for kf in relevant_files[:6]:
-                file_res = await client.get(f"{GITHUB_API_URL}/repos/{owner}/{repo}/contents/{kf}", headers=headers)
-                if file_res.status_code == 200:
-                    try:
-                        decoded = base64.b64decode(file_res.json().get('content', '')).decode('utf-8', errors='ignore')
-                        code_context += f"\n--- FILE: {kf} ---\n{decoded[:1500]}\n"
-                    except Exception:
-                        pass
-
-        prompt = f"""
-        [MULTI-STEP AI AGENT MODE]
-        Developer Preferences: {prefs}
-
-        Previous Repository Conversation:
-        {history}
-
-        Repository File Structure ({len(file_paths)} files total):
-        {str(file_paths[:40])}
-
-        Retrieved Code Context & Dependencies:
-        {code_context}
-
-        User Request: "{query}"
-
-        Analyze cross-file relationships, dependencies, and architecture to provide a comprehensive, step-by-step technical response.
-        """
-        
-        response = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-        answer = response.text
-        
-        save_chat_memory(user, f"{owner}/{repo}", "user", query)
-        save_chat_memory(user, f"{owner}/{repo}", "assistant", answer)
-
-        return {"answer": answer, "indexed_files_count": len(file_paths)}
-    except Exception as e:
-        return {"answer": f"⚠️ Agent execution failed: {str(e)}", "indexed_files_count": 0}
+    prompt = f"[MULTI-STEP AGENT]\nPreferences: {prefs}\nQuery: {query}"
+    res = client_ai.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+    save_chat_memory(user, f"{owner}/{repo}", "user", query)
+    save_chat_memory(user, f"{owner}/{repo}", "assistant", res.text)
+    return {"answer": res.text}
 
 if __name__ == "__main__":
     import uvicorn
