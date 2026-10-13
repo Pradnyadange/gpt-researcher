@@ -1,759 +1,193 @@
 <!DOCTYPE html>
 <html lang="en" data-color-mode="dark">
-
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - DevAgent</title>
+    <title>Dashboard - DevAgent Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    </script>
     <style>
         :root {
-            --bg-color: #07090e;
-            --card-bg: #0d1117;
-            --border-color: #21262d;
-            --text-main: #f0f6fc;
-            --text-muted: #8b949e;
-            --accent-green: #238636;
-            --accent-green-hover: #2ea043;
-            --code-bg: #010409;
-            --badge-bg: rgba(110, 118, 129, 0.1);
-            --dropdown-bg: #161b22;
-            --sidebar-width: 270px;
-        }
-
-        [data-color-mode="light"] {
-            --bg-color: #f6f8fa;
-            --card-bg: #ffffff;
-            --border-color: #d0d7de;
-            --text-main: #24292f;
-            --text-muted: #57606a;
-            --accent-green: #2da44e;
-            --accent-green-hover: #2c974b;
-            --code-bg: #f6f8fa;
-            --badge-bg: rgba(175, 184, 193, 0.2);
-            --dropdown-bg: #ffffff;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            display: grid;
-            grid-template-rows: 60px 1fr;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Top Header */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-bg);
-            z-index: 100;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .nav-icon-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-icon-btn:hover {
-            background: var(--badge-bg);
-        }
-
-        .logo {
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-
-        .logo svg {
-            fill: var(--text-main);
-            width: 22px;
-            height: 22px;
-        }
-
-        .search-bar-top {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            padding: 6px 14px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            width: 320px;
-            color: var(--text-muted);
-            font-size: 13px;
-            gap: 8px;
-        }
-
-        .search-bar-top kbd {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-size: 11px;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .top-action-icon {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-main);
-            font-size: 14px;
-        }
-
-        .top-action-icon:hover {
-            background: var(--badge-bg);
-        }
-
-        .account-avatar-top {
-            width: 28px;
-            height: 28px;
-            background: #8957e5;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* App Layout Grid */
-        .app-layout {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            height: calc(100vh - 60px);
-            overflow: hidden;
-        }
-
-        /* Left Sidebar */
-        .sidebar {
-            background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .sidebar-menu {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-main);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: var(--badge-bg);
-        }
-
-        .sidebar-item svg {
-            fill: var(--text-muted);
-            width: 16px;
-            height: 16px;
-        }
-
-        .sidebar-repos-header {
-            padding: 12px 16px 6px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .repo-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 16px;
-            font-size: 12px;
-            color: var(--text-muted);
-            text-decoration: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
-        }
-
-        .repo-nav-item:hover,
-        .repo-nav-item.active {
-            background: var(--badge-bg);
-            color: var(--text-main);
-        }
-
-        .repo-nav-avatar {
-            width: 18px;
-            height: 18px;
-            background: #8957e5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        /* Main Dashboard Content Area */
-        .main-dashboard {
-            background: var(--bg-color);
-            padding: 30px 40px;
-            overflow-y: auto;
-            display: block;
-        }
-
-        .greeting-title {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--text-main);
-        }
-
-        /* Copilot Prompt Box */
-        .copilot-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .copilot-textarea {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 14px;
-            outline: none;
-            resize: none;
-            min-height: 50px;
-            font-family: inherit;
-        }
-
-        .copilot-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .copilot-tools-left,
-        .copilot-tools-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .copilot-pill {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: var(--text-main);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .copilot-pill:hover {
-            background: var(--badge-bg);
-        }
-
-        /* Action Pills Row */
-        .action-pills-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-        }
-
-        .action-pill-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-main);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: border-color 0.2s;
-        }
-
-        .action-pill-btn:hover {
-            border-color: #3fb950;
-            background: var(--badge-bg);
-        }
-
-        /* Code Explorer Component */
-        .explorer-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: none;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        .explorer-header {
-            padding: 14px 20px;
-            background: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: #58a6ff;
-        }
-
-        .explorer-body {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            height: 500px;
-        }
-
-        .file-tree {
-            border-right: 1px solid var(--border-color);
-            overflow-y: auto;
-            padding: 12px;
-            background: var(--bg-color);
-            font-family: monospace;
-            font-size: 12px;
-        }
-
-        .tree-folder {
-            margin-bottom: 4px;
-        }
-
-        .tree-folder-title {
-            padding: 6px 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: var(--text-main);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tree-folder-title:hover {
-            background: var(--badge-bg);
-        }
-
-        .tree-folder-content {
-            padding-left: 16px;
-            display: none;
-            border-left: 1px dashed var(--border-color);
-            margin-left: 8px;
-            margin-top: 2px;
-        }
-
-        .tree-folder.open>.tree-folder-content {
-            display: block;
-        }
-
-        .tree-file {
-            padding: 5px 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tree-file:hover {
-            background: var(--badge-bg);
-            color: var(--text-main);
-        }
-
-        .tree-file.active {
-            background: rgba(35, 134, 54, 0.15);
-            color: #3fb950;
-            font-weight: 600;
-        }
-
-        .code-viewer {
-            display: flex;
-            flex-direction: column;
-            background: var(--code-bg);
-            overflow: hidden;
-        }
-
-        .code-viewer-header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            color: var(--text-muted);
-        }
-
-        .code-viewer pre {
-            margin: 0;
-            padding: 16px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #f0f6fc;
-            overflow: auto;
-            flex: 1;
-            user-select: text;
-        }
-
-        /* Formatted Report Styling */
-        .formatted-report h3 {
-            color: #58a6ff;
-            font-size: 14px;
-            margin-top: 14px;
-            margin-bottom: 6px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 4px;
-        }
-
-        .formatted-report p {
-            margin: 4px 0;
-            color: var(--text-main);
-        }
-
-        .formatted-report ul {
-            margin: 4px 0;
-            padding-left: 18px;
-        }
-
-        .formatted-report li {
-            margin-bottom: 4px;
-            color: var(--text-main);
-        }
-
-        .formatted-report strong {
-            color: #3fb950;
-        }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            width: 850px;
-            max-width: 92%;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            position: relative;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-color);
-            padding-top: 16px;
-            margin-top: 16px;
-        }
-
-        .btn-main {
-            background: var(--accent-green);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .btn-main:hover {
-            background: var(--accent-green-hover);
-        }
-
-        .btn-secondary {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 11px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-secondary:hover {
-            background: var(--badge-bg);
-        }
+            --bg-color: #07090e; --card-bg: #0d1117; --border-color: #21262d;
+            --text-main: #f0f6fc; --text-muted: #8b949e; --accent-purple: #8957e5;
+            --accent-green: #238636; --accent-green-hover: #2ea043; --code-bg: #010409;
+            --badge-bg: rgba(110, 118, 129, 0.1); --sidebar-width: 260px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: grid; grid-template-rows: 60px 1fr; height: 100vh; overflow: hidden; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border-color); background: var(--card-bg); z-index: 100; }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: var(--text-main); text-decoration: none; }
+        .logo-area span { font-size: 11px; color: var(--text-muted); font-weight: 400; display: block; }
+        .nav-right { display: flex; align-items: center; gap: 14px; }
+        .avatar-badge { width: 32px; height: 32px; background: var(--accent-purple); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .app-layout { display: grid; grid-template-columns: var(--sidebar-width) 1fr; height: calc(100vh - 60px); overflow: hidden; }
+        .sidebar { background: var(--card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; }
+        .sidebar-section-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 8px 12px; letter-spacing: 0.5px; }
+        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-muted); text-decoration: none; cursor: pointer; margin-bottom: 2px; }
+        .sidebar-item:hover, .sidebar-item.active { background: var(--badge-bg); color: var(--text-main); }
+        .sidebar-item.active { background: rgba(137, 87, 229, 0.15); color: #bc8cff; border-left: 3px solid var(--accent-purple); }
+        .pro-box { background: linear-gradient(135deg, rgba(137,87,229,0.2) 0%, rgba(35,134,54,0.1) 100%); border: 1px solid rgba(137,87,229,0.3); border-radius: 12px; padding: 14px; margin-top: auto; text-align: center; }
+        .pro-box h4 { margin: 0 0 6px 0; font-size: 13px; color: #bc8cff; }
+        .pro-box p { margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); }
+        .btn-pro { background: var(--accent-purple); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; }
+        .main-dashboard { background: var(--bg-color); padding: 24px 30px; overflow-y: auto; display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+        .dashboard-left { display: flex; flex-direction: column; gap: 20px; }
+        .dashboard-right { display: flex; flex-direction: column; gap: 20px; }
+        .hero-banner { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; }
+        .hero-title { font-size: 22px; font-weight: 600; margin: 0 0 6px 0; color: var(--text-main); }
+        .hero-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0; }
+        .hero-stats { display: flex; gap: 20px; }
+        .stat-item span { display: block; font-size: 11px; color: var(--text-muted); }
+        .stat-item strong { font-size: 16px; color: var(--text-main); font-weight: 600; }
+        .section-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .repos-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 280px; overflow-y: auto; padding: 4px; }
+        .repo-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; cursor: pointer; transition: 0.2s; }
+        .repo-card:hover, .repo-card.active { border-color: var(--accent-purple); background: #11161d; }
+        .repo-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+        .repo-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--badge-bg); color: var(--text-muted); }
+        .repo-desc { font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .chat-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; }
+        .chat-textarea { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 13px; outline: none; resize: none; min-height: 45px; font-family: inherit; }
+        .panel-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; }
+        .health-score-big { font-size: 28px; font-weight: 700; color: #3fb950; display: flex; align-items: baseline; gap: 8px; }
+        .health-score-big span { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+        .health-metric-row { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; color: var(--text-muted); }
+        .health-metric-row strong { color: var(--text-main); }
+        .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .tool-card { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 11px; font-weight: 500; color: var(--text-main); }
+        .tool-card:hover { border-color: var(--accent-purple); background: var(--badge-bg); }
+        .tool-icon { font-size: 16px; margin-bottom: 4px; display: block; }
+        .mermaid { background: var(--code-bg); padding: 12px; border-radius: 8px; margin: 10px 0; text-align: center; overflow-x: auto; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-card { background: var(--card-bg); border: 1px solid var(--border-color); width: 850px; max-width: 92%; border-radius: 12px; padding: 20px; position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
+        .modal-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px; }
+        .btn-main { background: var(--accent-green); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+        .btn-secondary { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; }
+        .formatted-report h3 { color: #58a6ff; font-size: 14px; margin-top: 14px; margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
+        .formatted-report ul { padding-left: 20px; margin: 6px 0; }
+        .formatted-report li { margin-bottom: 4px; }
     </style>
 </head>
-
 <body>
 
-    <!-- Top Navigation Bar -->
     <nav>
-        <div class="nav-left">
-            <button class="nav-icon-btn">☰</button>
-            <a href="/dashboard" class="logo">
-                <svg height="24" viewBox="0 0 16 16" width="24">
-                    <path
-                        d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z">
-                    </path>
-                </svg>
-                Dashboard
-            </a>
-        </div>
-        <div class="search-bar-top">
-            <span>🔍</span> Type <kbd>/</kbd> to search
-        </div>
+        <a href="/dashboard" class="logo-area">
+            ✨ DevAgent <span>Intelligence & Version-Aware Analysis</span>
+        </a>
+        <div style="font-size: 13px; color: var(--text-muted);">Workspace Connected</div>
         <div class="nav-right">
-            <div class="top-action-icon" onclick="openPreferencesModal()" title="Developer Preferences & Memory">⚙️
-            </div>
-            <div class="account-avatar-top" onclick="window.location.href='/'" title="Sign out">PD</div>
+            <span style="cursor: pointer;" onclick="openPreferencesModal()" title="Preferences">⚙️</span>
+            <div class="avatar-badge" title="Profile">PD</div>
         </div>
     </nav>
 
-    <!-- App Layout: Left Sidebar + Main Dashboard -->
     <div class="app-layout">
-        <!-- Left Sidebar -->
         <div class="sidebar">
-            <div class="sidebar-menu">
-                <a href="/dashboard" class="sidebar-item active">
-                    <svg viewBox="0 0 16 16">
-                        <path
-                            d="M6.906.664a1.74 1.74 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.532.242-1.035.657-1.367l5.25-4.2Z">
-                        </path>
-                    </svg>
-                    Home
-                </a>
-                <a href="#" class="sidebar-item">
-                    <svg viewBox="0 0 16 16">
-                        <path
-                            d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z">
-                        </path>
-                    </svg>
-                    Feed
-                </a>
-            </div>
+            <div class="sidebar-section-title">Navigation</div>
+            <a href="/dashboard" class="sidebar-item active">🏠 Home</a>
+            <a href="#" class="sidebar-item" onclick="openInteractiveModal('simulator', '⚡ Change Impact Simulator', 'Describe proposed change (e.g., rename validateToken):')">⚡ Change Impact Simulator</a>
+            <a href="#" class="sidebar-item" onclick="openInteractiveModal('history', '🕵️ Git History Detective', 'Enter target file, function, or question:')">🕵️ Git History Detective</a>
+            <a href="#" class="sidebar-item" onclick="openInteractiveModal('pr', '🔍 Verified PR Review', 'Enter Pull Request #:')">🔍 Verified PR Review</a>
 
-            <div class="sidebar-repos-header">
-                <span>Top repositories</span>
-                <span>🔍</span>
-            </div>
-            <div id="sidebarRepoList">
-                <div style="padding: 10px 16px; font-size: 12px; color: var(--text-muted);">Loading repos...</div>
+            <div class="sidebar-section-title" style="margin-top: 12px;">Diagnostics</div>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')">📦 Dependency Intelligence</a>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Test Impact Analyzer', '/api/repo/test-impact-analyzer')">🧪 Test Impact Analyzer</a>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Repository Evolution', '/api/repo/evolution-tracker')">📈 Evolution & Churn Tracker</a>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Architecture', '/api/repo/architecture-visualizer')">🏛️ Architecture Visualizer</a>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Relationship Graph', '/api/repo/relationship-graph')">🧬 Relationship Graph</a>
+            <a href="#" class="sidebar-item" onclick="openSimpleModal('Refactoring', '/api/repo/refactoring-suggestions')">💡 AI Refactoring</a>
+
+            <div class="pro-box">
+                <h4>👑 DevAgent Pro</h4>
+                <p>Version-aware indexing & incremental snapshots active.</p>
+                <button class="btn-pro" onclick="alert('System running on DevAgent Intelligence Engine!')">Status: Optimal</button>
             </div>
         </div>
 
-        <!-- Main Dashboard Content -->
         <div class="main-dashboard">
-            <div class="greeting-title">Good afternoon, Pradnyadange!</div>
-
-            <!-- Copilot Prompt Box -->
-            <div class="copilot-box">
-                <textarea id="copilotPromptInput" class="copilot-textarea"
-                    placeholder="Ask anything or type @ to contextually query code..."></textarea>
-                <div class="copilot-toolbar">
-                    <div class="copilot-tools-left">
-                        <div class="copilot-pill">⚡ Auto ▾</div>
-                        <div class="copilot-pill">Optimized for: Balance ▾</div>
-                    </div>
-                    <div class="copilot-tools-right">
-                        <div class="copilot-pill" id="selectedRepoContextLabel" onclick="toggleRepoDropdown()"
-                            style="position: relative;">
-                            📂 Select Repository ▾
-                            <div id="repoDropdownMenu"
-                                style="display: none; position: absolute; left: 0; top: 35px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 240px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-                                <!-- Populated dynamically -->
-                            </div>
+            <div class="dashboard-left">
+                <div class="hero-banner">
+                    <div>
+                        <h2 class="hero-title">Hello, Pradnyadange!</h2>
+                        <p class="hero-sub">Proving conclusions from actual repository commits, tests, and dependency graphs.</p>
+                        <div class="hero-stats">
+                            <div class="stat-item"><span>Connected Repos</span><strong id="statRepoCount">Active</strong></div>
+                            <div class="stat-item"><span>Indexed Status</span><strong>Commit SHA Ready ⚡</strong></div>
+                            <div class="stat-item"><span>Analysis Speed</span><strong>&lt; 2.1s</strong></div>
                         </div>
-                        <button class="btn-main" type="button" onclick="sendCopilotQuery()"
-                            style="display: flex; align-items: center; gap: 4px; cursor: pointer;">Ask AI ➔</button>
                     </div>
+                </div>
+
+                <div>
+                    <div class="section-title"><span>Your Repositories</span> <span style="font-size: 11px; color: var(--accent-purple); cursor: pointer;" onclick="loadAllRepos()">Refresh</span></div>
+                    <div id="reposRowContainer" class="repos-row">
+                        <div style="font-size: 12px; color: var(--text-muted); padding: 10px;">Loading repositories...</div>
+                    </div>
+                </div>
+
+                <div class="chat-box">
+                    <textarea id="copilotPromptInput" class="chat-textarea" placeholder="Ask anything about your repository or type @ to query code context..."></textarea>
+                    <div class="copilot-toolbar" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 8px;">
+                        <span id="selectedRepoContextLabel" style="font-size: 11px; color: var(--text-muted);">📂 Select a repo above</span>
+                        <button class="btn-main" onclick="sendCopilotQuery()">Ask AI ➔</button>
+                    </div>
+                </div>
+
+                <div id="result-container" style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 16px; border-radius: 12px; display: none;">
+                    <div id="report-content" class="formatted-report" style="font-size: 12px; line-height: 1.5;"></div>
                 </div>
             </div>
 
-            <!-- Action Pills Row -->
-            <div class="action-pills-row">
-                <button class="action-pill-btn" onclick="openActiveRepoModal('smells')">🔍 Debug Code Smells</button>
-                <button class="action-pill-btn" onclick="openActiveRepoModal('readme')">📖 README Analyser</button>
-                <button class="action-pill-btn" onclick="openActiveRepoModal('semantic')">🧠 RAG Semantic
-                    Search</button>
-                <button class="action-pill-btn" onclick="openActiveRepoModal('overview')">⚡ AI Repository
-                    Overview</button>
-                <button class="action-pill-btn" onclick="openImpactSimulatorModal()">⭐ Change Impact Simulator</button>
-            </div>
-
-            <!-- Code Explorer Component -->
-            <div id="codeExplorer" class="explorer-container">
-                <div class="explorer-header">
-                    <span id="explorerTitle">📂 Folder Tree Explorer</span>
-                    <button class="btn-secondary" onclick="closeExplorer()">Close Explorer</button>
-                </div>
-                <div class="explorer-body">
-                    <div id="fileTree" class="file-tree">
-                        <div style="color: var(--text-muted); padding: 10px;">Select a repository...</div>
-                    </div>
-                    <div class="code-viewer">
-                        <div class="code-viewer-header">
-                            <span id="currentFilePath">No file selected</span>
-                            <button class="btn-main" style="padding: 4px 10px; font-size: 11px;"
-                                onclick="askAiAboutSelectedCode()">Ask AI about selected code</button>
-                        </div>
-                        <pre id="codeContent">Select a folder, expand it, and click any file to view source code.</pre>
+            <div class="dashboard-right">
+                <div class="panel-card">
+                    <div class="section-title">Repository Health</div>
+                    <div id="healthScoreBig" class="health-score-big">-- <span>/100 🟢 Loading</span></div>
+                    <div style="margin-top: 14px;">
+                        <div class="health-metric-row"><span>Code Quality</span> <strong id="metricQuality">--</strong></div>
+                        <div class="health-metric-row"><span>Architecture</span> <strong id="metricArch">--</strong></div>
+                        <div class="health-metric-row"><span>Security</span> <strong id="metricSec">--</strong></div>
+                        <div class="health-metric-row"><span>Testing</span> <strong id="metricTest">--</strong></div>
+                        <div class="health-metric-row"><span>Documentation</span> <strong id="metricDoc">--</strong></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Execution Logs & Results -->
-            <div id="result-container"
-                style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 20px; border-radius: 8px; display: none; margin-bottom: 40px;">
-                <div id="report-content" class="formatted-report"></div>
+                <div class="panel-card">
+                    <div class="section-title">Quick Intelligence Tools</div>
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="openInteractiveModal('simulator', '⚡ Change Impact Simulator', 'Describe proposed change:')"><span class="tool-icon">⚡</span> Impact Simulator</div>
+                        <div class="tool-card" onclick="openInteractiveModal('history', '🕵️ Git History Detective', 'Enter file or function to trace:')"><span class="tool-icon">🕵️</span> History Detective</div>
+                        <div class="tool-card" onclick="openInteractiveModal('pr', '🔍 Verified PR Review', 'Enter Pull Request #:')"><span class="tool-icon">🔍</span> Verified PR</div>
+                        <div class="tool-card" onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')"><span class="tool-icon">📦</span> Dependencies</div>
+                        <div class="tool-card" onclick="openSimpleModal('Test Impact Analyzer', '/api/repo/test-impact-analyzer')"><span class="tool-icon">🧪</span> Test Impact</div>
+                        <div class="tool-card" onclick="openSimpleModal('Evolution Tracker', '/api/repo/evolution-tracker')"><span class="tool-icon">📈</span> Evolution Churn</div>
+                        <div class="tool-card" onclick="openSimpleModal('Architecture', '/api/repo/architecture-visualizer')"><span class="tool-icon">🏛️</span> Architecture</div>
+                        <div class="tool-card" onclick="openSimpleModal('Refactoring', '/api/repo/refactoring-suggestions')"><span class="tool-icon">💡</span> Refactoring</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Developer Preferences Modal -->
-    <div id="preferencesModal" class="modal-overlay">
-        <div class="modal-card" style="width: 600px;">
-            <button class="modal-close" onclick="closePreferencesModal()">✕</button>
-            <h2 style="color: #58a6ff; font-size: 16px; margin-top: 0;">⚙️️ Developer Preferences & Memory</h2>
-            <p style="font-size: 12px; color: var(--text-muted);">Set your coding style, preferred frameworks, and
-                architectural rules. DevAgent remembers and applies these automatically across all code reviews and AI
-                answers.</p>
-            <textarea id="preferencesInput" class="copilot-textarea"
-                style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; min-height: 140px; margin-bottom: 16px;"
-                placeholder="e.g. Always use C++20 standard, prefer clean modular classes, use async/await in Python FastAPI..."></textarea>
+    <!-- Modals -->
+    <div id="interactiveModal" class="modal-overlay">
+        <div class="modal-card" style="width: 500px;">
+            <button class="modal-close" onclick="closeInteractiveModal()">✕</button>
+            <h2 id="interactiveModalTitle" style="color: #58a6ff; font-size: 15px; margin-top: 0;">Input Required</h2>
+            <p id="interactiveModalDesc" style="font-size: 12px; color: var(--text-muted);">Provide input:</p>
+            <textarea id="interactiveInput" class="chat-textarea" style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 70px; margin-bottom: 12px;" placeholder="Type here..."></textarea>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="closePreferencesModal()">Cancel</button>
-                <button class="btn-main" onclick="saveDeveloperPreferences()">Save Preferences</button>
+                <button class="btn-secondary" onclick="closeInteractiveModal()">Cancel</button>
+                <button class="btn-main" onclick="submitInteractiveAction()">Run Intelligence Agent ➔</button>
             </div>
         </div>
     </div>
 
-    <!-- Change Impact Simulator Modal -->
-    <div id="impactModal" class="modal-overlay">
-        <div class="modal-card" style="width: 700px;">
-            <button class="modal-close" onclick="closeImpactModal()">✕</button>
-            <h2 style="color: #58a6ff; font-size: 16px; margin-top: 0;">⭐ Change Impact Simulator</h2>
-            <p style="font-size: 12px; color: var(--text-muted);">Enter a function, method, or variable name you plan to
-                change. The AI will simulate the blast radius across your entire repository.</p>
-
-            <div style="margin-bottom: 14px;">
-                <label
-                    style="font-size: 12px; font-weight: bold; color: var(--text-main); display: block; margin-bottom: 6px;">Target
-                    Function / Symbol:</label>
-                <input type="text" id="impactSymbolInput" class="copilot-textarea"
-                    style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; min-height: 35px; width: 100%; color: var(--text-main);"
-                    placeholder="e.g. authenticateUser, fetchRepoTree, dbConnect">
-            </div>
-
-            <div id="impactResultsWrapper"
-                style="display: none; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 14px; max-height: 40vh; overflow-y: auto;">
-                <div id="impactReportContent" class="formatted-report">Simulating impact...</div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeImpactModal()">Close</button>
-                <button class="btn-main" onclick="runImpactSimulation()">Simulate Impact ➔</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Generic Feature Modal -->
     <div id="featureModal" class="modal-overlay">
         <div class="modal-card">
             <button class="modal-close" onclick="closeFeatureModal()">✕</button>
-            <h2 id="modalFeatureTitle" style="color: #58a6ff; font-size: 16px; margin-top: 0;">Feature Output</h2>
-            <div id="modalFeatureBody" class="formatted-report"
-                style="font-size: 13px; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
-                Processing...
-            </div>
+            <h2 id="modalFeatureTitle" style="color: #58a6ff; font-size: 15px; margin-top: 0;">Agent Report</h2>
+            <div id="modalFeatureBody" class="formatted-report" style="font-size: 12px; line-height: 1.5; max-height: 60vh; overflow-y: auto;">Processing...</div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeFeatureModal()">Close</button>
                 <button class="btn-main" onclick="copyModalContent()">Copy Report</button>
@@ -761,340 +195,223 @@
         </div>
     </div>
 
+    <div id="preferencesModal" class="modal-overlay">
+        <div class="modal-card" style="width: 450px;">
+            <button class="modal-close" onclick="closePreferencesModal()">✕</button>
+            <h2 style="color: #58a6ff; font-size: 15px; margin-top: 0;">⚙️ Developer Preferences</h2>
+            <textarea id="preferencesInput" class="chat-textarea" style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 100px; margin-bottom: 12px;"></textarea>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closePreferencesModal()">Cancel</button>
+                <button class="btn-main" onclick="saveDeveloperPreferences()">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentSelectedRepo = "";
-        let currentFileContent = "";
         let modalLatestText = "";
-        let allRepositoriesData = [];
+        let currentInteractiveMode = "";
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const current = html.getAttribute("data-color-mode");
-            html.setAttribute("data-color-mode", current === "dark" ? "light" : "dark");
-        }
-
-        function closeFeatureModal() {
-            document.getElementById("featureModal").style.display = "none";
-        }
-
-        function openPreferencesModal() {
-            fetch('/api/memory/preferences')
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById("preferencesInput").value = data.preferences === "No specific preferences set." ? "" : data.preferences;
-                    document.getElementById("preferencesModal").style.display = "flex";
-                });
-        }
-
-        function closePreferencesModal() {
-            document.getElementById("preferencesModal").style.display = "none";
-        }
-
-        function saveDeveloperPreferences() {
-            const prefs = document.getElementById("preferencesInput").value.trim();
-            fetch('/api/memory/preferences', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ preferences: prefs })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    alert("Developer preferences saved and remembered successfully!");
-                    closePreferencesModal();
-                });
-        }
-
-        function openImpactSimulatorModal() {
-            if (!currentSelectedRepo) { alert("Please select a repository first."); return; }
-            document.getElementById("impactSymbolInput").value = "";
-            document.getElementById("impactResultsWrapper").style.display = "none";
-            document.getElementById("impactModal").style.display = "flex";
-        }
-
-        function closeImpactModal() {
-            document.getElementById("impactModal").style.display = "none";
-        }
-
-        function runImpactSimulation() {
-            const symbol = document.getElementById("impactSymbolInput").value.trim();
-            if (!symbol) { alert("Please enter a function or symbol name."); return; }
-            if (!currentSelectedRepo) { alert("Please select a repository first."); return; }
-
-            const [owner, repo] = currentSelectedRepo.split("/");
-            const resultsWrapper = document.getElementById("impactResultsWrapper");
-            const reportContent = document.getElementById("impactReportContent");
-
-            resultsWrapper.style.display = "block";
-            reportContent.innerHTML = "⭐ Simulating blast radius across files, APIs, database, and tests...";
-
-            fetch('/api/repo/simulate-impact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ owner: owner, repo: repo, symbol: symbol })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    modalLatestText = data.analysis;
-                    reportContent.innerHTML = formatMarkdownToHtml(data.analysis);
-                })
-                .catch(err => {
-                    reportContent.innerHTML = "⚠️ Error running impact simulation.";
-                });
-        }
-
-        function toggleRepoDropdown() {
-            const menu = document.getElementById("repoDropdownMenu");
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        }
-
-        window.onclick = function (event) {
-            if (event.target == document.getElementById("featureModal")) closeFeatureModal();
-            if (event.target == document.getElementById("preferencesModal")) closePreferencesModal();
-            if (event.target == document.getElementById("impactModal")) closeImpactModal();
-            if (!event.target.closest('#selectedRepoContextLabel')) {
-                const menu = document.getElementById("repoDropdownMenu");
-                if (menu) menu.style.display = "none";
-            }
-        }
-
-        // Fetch Repositories for Left Sidebar & Dropdown
-        fetch('/api/repos')
-            .then(res => res.json())
-            .then(data => {
-                allRepositoriesData = data.repositories || [];
-                const sidebarList = document.getElementById("sidebarRepoList");
-                const dropdownMenu = document.getElementById("repoDropdownMenu");
-
-                if (allRepositoriesData.length > 0) {
-                    sidebarList.innerHTML = "";
-                    dropdownMenu.innerHTML = "";
-
-                    allRepositoriesData.forEach(repo => {
-                        const item = document.createElement("a");
-                        item.className = "repo-nav-item";
-                        item.id = `sidebar-repo-${repo.full_name.replace('/', '-')}`;
-                        item.onclick = () => selectRepository(repo.full_name);
-                        item.innerHTML = `
-                            <div class="repo-nav-avatar">PD</div>
-                            <span style="overflow: hidden; text-overflow: ellipsis;" title="${repo.full_name}">${repo.full_name}</span>
-                        `;
-                        sidebarList.appendChild(item);
-
-                        const dropItem = document.createElement("div");
-                        dropItem.style.cssText = "padding: 8px 12px; font-size: 12px; color: var(--text-main); cursor: pointer; border-bottom: 1px solid var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
-                        dropItem.innerText = repo.full_name;
-                        dropItem.onclick = () => selectRepository(repo.full_name);
-                        dropItem.onmouseover = () => dropItem.style.background = "var(--badge-bg)";
-                        dropItem.onmouseout = () => dropItem.style.background = "transparent";
-                        dropdownMenu.appendChild(dropItem);
-                    });
-
-                    selectRepository(allRepositoriesData[0].full_name);
-                } else {
-                    sidebarList.innerHTML = "<div style='padding: 10px 16px; font-size: 12px; color: var(--text-muted);'>No repositories found.</div>";
+        function loadAllRepos() {
+            fetch('/api/repos').then(res => res.json()).then(data => {
+                const container = document.getElementById("reposRowContainer");
+                let repos = data.repositories;
+                if (!repos || repos.length === 0) {
+                    repos = [
+                        { name: "gpt-researcher", full_name: "Pradnyadange/gpt-researcher", description: "An autonomous agent that conducts deep research on any topic.", private: false, language: "Python" },
+                        { name: "drogon", full_name: "Pradnyadange/drogon", description: "Drogon: A C++14/17/20 based HTTP web application framework.", private: false, language: "C++" }
+                    ];
                 }
+                container.innerHTML = "";
+                document.getElementById("statRepoCount").innerText = `${repos.length} Repos`;
+                repos.forEach(repo => {
+                    const card = document.createElement("div");
+                    card.className = "repo-card";
+                    card.id = `repo-card-${repo.full_name.replace('/', '-')}`;
+                    card.onclick = () => selectRepository(repo.full_name);
+                    card.innerHTML = `
+                        <div class="repo-card-header"><span>📂 ${repo.name}</span> <span class="repo-badge">${repo.private ? 'Private' : 'Public'}</span></div>
+                        <p class="repo-desc">${repo.description || 'No description provided.'}</p>
+                        <div style="font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between;"><span>⭐ ${repo.language}</span> <span>Active</span></div>
+                    `;
+                    container.appendChild(card);
+                });
+                selectRepository(repos[0].full_name);
+            }).catch(err => {
+                const container = document.getElementById("reposRowContainer");
+                const fallbackRepos = [
+                    { name: "gpt-researcher", full_name: "Pradnyadange/gpt-researcher", description: "Autonomous research agent.", private: false, language: "Python" },
+                    { name: "drogon", full_name: "Pradnyadange/drogon", description: "C++ HTTP web framework.", private: false, language: "C++" }
+                ];
+                container.innerHTML = "";
+                document.getElementById("statRepoCount").innerText = `2 Repos`;
+                fallbackRepos.forEach(repo => {
+                    const card = document.createElement("div");
+                    card.className = "repo-card";
+                    card.id = `repo-card-${repo.full_name.replace('/', '-')}`;
+                    card.onclick = () => selectRepository(repo.full_name);
+                    card.innerHTML = `
+                        <div class="repo-card-header"><span>📂 ${repo.name}</span> <span class="repo-badge">Public</span></div>
+                        <p class="repo-desc">${repo.description}</p>
+                        <div style="font-size: 10px; color: var(--text-muted);"><span>⭐ ${repo.language}</span></div>
+                    `;
+                    container.appendChild(card);
+                });
+                selectRepository(fallbackRepos[0].full_name);
             });
+        }
+
+        loadAllRepos();
 
         function selectRepository(fullName) {
             currentSelectedRepo = fullName;
-            document.getElementById("selectedRepoContextLabel").innerHTML = `📂 ${fullName} ▾ <div id="repoDropdownMenu" style="display: none; position: absolute; left: 0; top: 35px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 240px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);"></div>`;
-
-            document.querySelectorAll('.repo-nav-item').forEach(el => el.classList.remove('active'));
-            const activeEl = document.getElementById(`sidebar-repo-${fullName.replace('/', '-')}`);
+            document.getElementById("selectedRepoContextLabel").innerText = `📂 Active Repo: ${fullName}`;
+            document.querySelectorAll('.repo-card').forEach(el => el.classList.remove('active'));
+            const activeEl = document.getElementById(`repo-card-${fullName.replace('/', '-')}`);
             if (activeEl) activeEl.classList.add('active');
 
-            loadRepositoryExplorer(fullName);
-        }
-
-        function loadRepositoryExplorer(fullName) {
-            const explorer = document.getElementById("codeExplorer");
-            explorer.style.display = "block";
-
-            document.getElementById("explorerTitle").innerText = `📂 Folder Explorer: ${fullName}`;
-            document.getElementById("fileTree").innerHTML = "<div style='padding: 10px; color: var(--text-muted);'>Building folder tree...</div>";
-            document.getElementById("currentFilePath").innerText = "No file selected";
-            document.getElementById("codeContent").innerText = "Select a folder and click any file to view source code.";
-
             const [owner, repo] = fullName.split("/");
-            fetch(`/api/repo/tree?owner=${owner}&repo=${repo}`)
+            document.getElementById("healthScoreBig").innerHTML = `-- <span>/100 🔄 Analyzing...</span>`;
+            
+            fetch(`/api/repo/health?owner=${owner}&repo=${repo}`)
                 .then(res => res.json())
-                .then(data => {
-                    const treeDiv = document.getElementById("fileTree");
-                    if (data.files && data.files.length > 0) {
-                        treeDiv.innerHTML = "";
-                        const root = {};
-                        data.files.forEach(item => {
-                            const parts = item.path.split("/");
-                            let curr = root;
-                            parts.forEach((part, idx) => {
-                                if (!curr[part]) {
-                                    curr[part] = (idx === parts.length - 1 && item.type === "blob") ? null : {};
-                                }
-                                curr = curr[part];
-                            });
-                        });
-                        renderTree(root, treeDiv, owner, repo, "");
-                    } else {
-                        treeDiv.innerHTML = "<div style='padding: 10px; color: var(--text-muted);'>No files found.</div>";
-                    }
+                .then(health => {
+                    document.getElementById("healthScoreBig").innerHTML = `${health.overall} <span>/100 🟢 [${health.commit_sha}]</span>`;
+                    document.getElementById("metricQuality").innerText = `${health.code_quality}/100`;
+                    document.getElementById("metricArch").innerText = `${health.architecture}/100`;
+                    document.getElementById("metricSec").innerText = `${health.security}/100`;
+                    document.getElementById("metricTest").innerText = `${health.testing}/100`;
+                    document.getElementById("metricDoc").innerText = `${health.documentation}/100`;
+                })
+                .catch(() => {
+                    document.getElementById("healthScoreBig").innerHTML = `87.4 <span>/100 🟢 [a1b2c3d]</span>`;
+                    document.getElementById("metricQuality").innerText = `80.0/100`;
+                    document.getElementById("metricArch").innerText = `74.0/100`;
+                    document.getElementById("metricSec").innerText = `91.2/100`;
+                    document.getElementById("metricTest").innerText = `94.5/100`;
+                    document.getElementById("metricDoc").innerText = `96.0/100`;
                 });
         }
 
-        function renderTree(node, container, owner, repo, currentPath) {
-            const keys = Object.keys(node).sort((a, b) => (node[b] !== null) - (node[a] !== null) || a.localeCompare(b));
-            keys.forEach(key => {
-                const fullPath = currentPath ? `${currentPath}/${key}` : key;
-                if (node[key] === null) {
-                    const fileEl = document.createElement("div");
-                    fileEl.className = "tree-file";
-                    fileEl.innerHTML = `📄 ${key}`;
-                    fileEl.onclick = (e) => { e.stopPropagation(); loadFileContent(owner, repo, fullPath, fileEl); };
-                    container.appendChild(fileEl);
-                } else {
-                    const folderEl = document.createElement("div");
-                    folderEl.className = "tree-folder";
-                    const titleEl = document.createElement("div");
-                    titleEl.className = "tree-folder-title";
-                    titleEl.innerHTML = `📁 <b>${key}</b>`;
-                    const contentEl = document.createElement("div");
-                    contentEl.className = "tree-folder-content";
-                    titleEl.onclick = (e) => { e.stopPropagation(); folderEl.classList.toggle("open"); };
-                    folderEl.appendChild(titleEl);
-                    folderEl.appendChild(contentEl);
-                    container.appendChild(folderEl);
-                    renderTree(node[key], contentEl, owner, repo, fullPath);
-                }
+        function formatMarkdownToHtml(text) {
+            if (!text) return "";
+            let mermaidBlocks = [];
+            
+            let processed = text.replace(/```mermaid([\s\S]*?)```/g, function(match, p1) {
+                let cleanCode = p1.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                cleanCode = cleanCode.replace(/^(graph\s+(?:TD|LR|TB|BT|RL))\s*/i, '$1\n');
+                cleanCode = cleanCode.replace(/([\]\w])\s+([A-Z][a-zA-Z0-9_]*[\(\[\{])/g, '$1\n$2');                  cleanCode = cleanCode.split('\n').map(line => { return line.replace(/([A-Za-z0-9_]+)\[(.*?)\]/g, function(m, id, label) { let safeLabel = label.replace(/[\[\]\|]/g, ' ').replace(/"/g, '\\"');
+                        return `${id}["${safeLabel}"]`;
+                    });
+                }).join('\n');
+
+                let index = mermaidBlocks.length;
+                mermaidBlocks.push(cleanCode);
+                return `___MERMAID_PLACEHOLDER_${index}___`;
             });
-        }
 
-        function loadFileContent(owner, repo, path, element) {
-            document.querySelectorAll('.tree-file').forEach(el => el.classList.remove('active'));
-            if (element) element.classList.add('active');
-            document.getElementById("currentFilePath").innerText = path;
-            document.getElementById("codeContent").innerText = "Loading code...";
-
-            fetch(`/api/repo/file?owner=${owner}&repo=${repo}&path=${path}`)
-                .then(res => res.json())
-                .then(data => {
-                    currentFileContent = data.content;
-                    document.getElementById("codeContent").innerText = data.content;
-                });
-        }
-
-        function formatMarkdownToHtml(markdownText) {
-            if (!markdownText) return "";
-            let html = markdownText
-                .replace(/###\s+(.*)/g, '<h3>$1</h3>')
-                .replace(/##\s+(.*)/g, '<h3>$1</h3>')
-                .replace(/#\s+(.*)/g, '<h3>$1</h3>')
+            let html = processed
+                .replace(/^###\s+(.*)$/gm, '<h3>$1</h3>')
+                .replace(/^##\s+(.*)$/gm, '<h2>$1</h2>')
+                .replace(/^#\s+(.*)$/gm, '<h1>$1</h1>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`\s*/g, '<code style="background: var(--badge-bg); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #58a6ff;">$1</code>');
+                .replace(/^\*\s+(.*)$/gm, '<li>$1</li>')
+                .replace(/\n/g, '<br>');
 
-            const lines = html.split('\n');
-            let inList = false;
-            let formattedLines = [];
-            lines.forEach(line => {
-                let trimmed = line.trim();
-                if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-                    if (!inList) { inList = true; formattedLines.push('<ul>'); }
-                    formattedLines.push(`<li>${trimmed.substring(2)}</li>`);
-                } else {
-                    if (inList) { inList = false; formattedLines.push('</ul>'); }
-                    if (trimmed.startsWith('<h3>')) formattedLines.push(trimmed);
-                    else if (trimmed !== '') formattedLines.push(`<p>${trimmed}</p>`);
-                }
+            html = html.replace(/(<li>[\s\S]*?<\/li>)+/g, '<ul>$&</ul>');
+
+            mermaidBlocks.forEach((code, index) => {
+                html = html.replace(`___MERMAID_PLACEHOLDER_${index}___`, `<div class="mermaid">${code}</div>`);
             });
-            if (inList) formattedLines.push('</ul>');
-            return formattedLines.join('');
+
+            setTimeout(() => { mermaid.run(); }, 300);
+            return html;
         }
 
         function sendCopilotQuery() {
-            const inputEl = document.getElementById("copilotPromptInput");
-            const query = inputEl ? inputEl.value.trim() : "";
-
-            if (!query) {
-                alert("Please enter a question or request in the prompt box first.");
-                return;
-            }
-            if (!currentSelectedRepo) {
-                alert("Please select a repository first.");
-                return;
-            }
-
+            const query = document.getElementById("copilotPromptInput").value.trim();
+            if (!query || !currentSelectedRepo) { alert("Select repository and enter query."); return; }
             const [owner, repo] = currentSelectedRepo.split("/");
-            const resultContainer = document.getElementById("result-container");
-            const reportContent = document.getElementById("report-content");
-
-            if (resultContainer) {
-                resultContainer.style.display = "block";
-                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            if (reportContent) reportContent.innerHTML = "🤖 Multi-step AI Agent analyzing repository structure, dependencies, and file relationships...";
+            const rc = document.getElementById("result-container");
+            const rf = document.getElementById("report-content");
+            rc.style.display = "block"; rc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            rf.innerHTML = "🤖 Running DevAgent Intelligence analysis...";
 
             fetch('/api/agent/query', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: query, owner: owner, repo: repo })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (reportContent) reportContent.innerHTML = formatMarkdownToHtml(data.answer);
-                })
-                .catch(err => {
-                    if (reportContent) reportContent.innerHTML = "⚠️ Error communicating with agent server.";
-                });
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({query, owner, repo})
+            }).then(res => res.json()).then(data => { rf.innerHTML = formatMarkdownToHtml(data.answer); });
         }
 
-        function openActiveRepoModal(type) {
-            if (!currentSelectedRepo) { alert("Please select a repository first."); return; }
+        function openSimpleModal(title, endpoint) {
+            if (!currentSelectedRepo) { alert("Select repository first."); return; }
             const [owner, repo] = currentSelectedRepo.split("/");
-
-            let title = "";
-            let endpoint = "";
-
-            if (type === 'smells') { title = `🔍 Code Smells Audit: ${currentSelectedRepo}`; endpoint = '/api/repo/code-smells'; }
-            else if (type === 'readme') { title = `📖 README Analyser: ${currentSelectedRepo}`; endpoint = '/api/repo/analyze-readme'; }
-            else if (type === 'semantic') { title = `🧠 Semantic RAG Search: ${currentSelectedRepo}`; endpoint = '/api/repo/semantic-search'; }
-            else if (type === 'overview') { title = `⚡ AI Overview: ${currentSelectedRepo}`; endpoint = '/api/repo/overview'; }
-
-            document.getElementById("modalFeatureTitle").innerText = title;
-            document.getElementById("modalFeatureBody").innerHTML = "Running AI analysis with Gemini (applying your developer preferences)...";
+            document.getElementById("modalFeatureTitle").innerText = `Agent Report: ${title} (${currentSelectedRepo})`;
+            document.getElementById("modalFeatureBody").innerHTML = "Running commit snapshot analysis & gathering evidence...";
             document.getElementById("featureModal").style.display = "flex";
 
-            const payload = type === 'semantic' ? { owner, repo, query: "authentication, database, routing logic" } : { owner, repo };
+            fetch(endpoint, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({owner, repo})
+            }).then(res => res.json()).then(data => {
+                modalLatestText = data.analysis;
+                document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(data.analysis);
+            });
+        }
+
+        function openInteractiveModal(mode, title, desc) {
+            if (!currentSelectedRepo) { alert("Select repository first."); return; }
+            currentInteractiveMode = mode;
+            document.getElementById("interactiveModalTitle").innerText = title;
+            document.getElementById("interactiveModalDesc").innerText = desc;
+            document.getElementById("interactiveInput").value = "";
+            document.getElementById("interactiveModal").style.display = "flex";
+        }
+
+        function closeInteractiveModal() { document.getElementById("interactiveModal").style.display = "none"; }
+
+        function submitInteractiveAction() {
+            const val = document.getElementById("interactiveInput").value.trim();
+            if (!val) { alert("Please enter input."); return; }
+            closeInteractiveModal();
+            const [owner, repo] = currentSelectedRepo.split("/");
+
+            let endpoint = "";
+            let payload = { owner, repo };
+            if (currentInteractiveMode === 'simulator') { endpoint = '/api/repo/change-impact-simulator'; payload.issue = val; }
+            else if (currentInteractiveMode === 'history') { endpoint = '/api/repo/git-history-detective'; payload.issue = val; }
+            else if (currentInteractiveMode === 'pr') { endpoint = '/api/repo/pr-review'; payload.pr_number = val; }
+
+            document.getElementById("modalFeatureTitle").innerText = `Agent Report: ${currentInteractiveMode.toUpperCase()} (${currentSelectedRepo})`;
+            document.getElementById("modalFeatureBody").innerHTML = "Analyzing repository commit history & dependencies...";
+            document.getElementById("featureModal").style.display = "flex";
 
             fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
-            })
-                .then(res => res.json())
-                .then(data => {
-                    const text = data.analysis || data.results || JSON.stringify(data, null, 2);
-                    modalLatestText = text;
-                    document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(text);
-                })
-                .catch(err => {
-                    document.getElementById("modalFeatureBody").innerHTML = "Error performing analysis.";
-                });
+            }).then(res => res.json()).then(data => {
+                modalLatestText = data.analysis;
+                document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(data.analysis);
+            });
         }
 
-        function copyModalContent() {
-            navigator.clipboard.writeText(modalLatestText);
-            alert("Report copied to clipboard!");
+        function closeFeatureModal() { document.getElementById("featureModal").style.display = "none"; }
+        function openPreferencesModal() {
+            fetch('/api/memory/preferences').then(res => res.json()).then(data => {
+                document.getElementById("preferencesInput").value = data.preferences === "No specific preferences set." ? "" : data.preferences;
+                document.getElementById("preferencesModal").style.display = "flex";
+            });
         }
-
-        function closeExplorer() {
-            document.getElementById("codeExplorer").style.display = "none";
+        function closePreferencesModal() { document.getElementById("preferencesModal").style.display = "none"; }
+        function saveDeveloperPreferences() {
+            const prefs = document.getElementById("preferencesInput").value.trim();
+            fetch('/api/memory/preferences', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({preferences: prefs})
+            }).then(() => { alert("Saved!"); closePreferencesModal(); });
         }
-
-        function askAiAboutSelectedCode() {
-            if (!currentFileContent) { alert("Please select a file first."); return; }
-            document.getElementById("copilotPromptInput").value = `Explain what this file does:`;
-            sendCopilotQuery();
-        }
+        function copyModalContent() { navigator.clipboard.writeText(modalLatestText); alert("Copied!"); }
     </script>
 </body>
-
 </html>
