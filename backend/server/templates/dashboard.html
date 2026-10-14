@@ -1,79 +1,469 @@
 <!DOCTYPE html>
 <html lang="en" data-color-mode="dark">
+
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - DevAgent Intelligence</title>
+    <title>Dashboard - DevAgent Intelligence Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
         mermaid.initialize({ startOnLoad: false, theme: 'dark' });
     </script>
     <style>
         :root {
-            --bg-color: #07090e; --card-bg: #0d1117; --border-color: #21262d;
-            --text-main: #f0f6fc; --text-muted: #8b949e; --accent-purple: #8957e5;
-            --accent-green: #238636; --accent-green-hover: #2ea043; --code-bg: #010409;
-            --badge-bg: rgba(110, 118, 129, 0.1); --sidebar-width: 260px;
+            --bg-color: #07090e;
+            --card-bg: #0d1117;
+            --border-color: #21262d;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --accent-purple: #8957e5;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --code-bg: #010409;
+            --badge-bg: rgba(110, 118, 129, 0.1);
+            --sidebar-width: 260px;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: grid; grid-template-rows: 60px 1fr; height: 100vh; overflow: hidden; }
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border-color); background: var(--card-bg); z-index: 100; }
-        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: var(--text-main); text-decoration: none; }
-        .logo-area span { font-size: 11px; color: var(--text-muted); font-weight: 400; display: block; }
-        .nav-right { display: flex; align-items: center; gap: 14px; }
-        .avatar-badge { width: 32px; height: 32px; background: var(--accent-purple); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
-        .app-layout { display: grid; grid-template-columns: var(--sidebar-width) 1fr; height: calc(100vh - 60px); overflow: hidden; }
-        .sidebar { background: var(--card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; padding: 12px; }
-        .sidebar-section-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 8px 12px; letter-spacing: 0.5px; }
-        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-muted); text-decoration: none; cursor: pointer; margin-bottom: 2px; }
-        .sidebar-item:hover, .sidebar-item.active { background: var(--badge-bg); color: var(--text-main); }
-        .sidebar-item.active { background: rgba(137, 87, 229, 0.15); color: #bc8cff; border-left: 3px solid var(--accent-purple); }
-        .pro-box { background: linear-gradient(135deg, rgba(137,87,229,0.2) 0%, rgba(35,134,54,0.1) 100%); border: 1px solid rgba(137,87,229,0.3); border-radius: 12px; padding: 14px; margin-top: auto; text-align: center; }
-        .pro-box h4 { margin: 0 0 6px 0; font-size: 13px; color: #bc8cff; }
-        .pro-box p { margin: 0 0 10px 0; font-size: 11px; color: var(--text-muted); }
-        .btn-pro { background: var(--accent-purple); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; }
-        .main-dashboard { background: var(--bg-color); padding: 24px 30px; overflow-y: auto; display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
-        .dashboard-left { display: flex; flex-direction: column; gap: 20px; }
-        .dashboard-right { display: flex; flex-direction: column; gap: 20px; }
-        .hero-banner { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; }
-        .hero-title { font-size: 22px; font-weight: 600; margin: 0 0 6px 0; color: var(--text-main); }
-        .hero-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0; }
-        .hero-stats { display: flex; gap: 20px; }
-        .stat-item span { display: block; font-size: 11px; color: var(--text-muted); }
-        .stat-item strong { font-size: 16px; color: var(--text-main); font-weight: 600; }
-        .section-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .repos-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 280px; overflow-y: auto; padding: 4px; }
-        .repo-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; cursor: pointer; transition: 0.2s; }
-        .repo-card:hover, .repo-card.active { border-color: var(--accent-purple); background: #11161d; }
-        .repo-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
-        .repo-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--badge-bg); color: var(--text-muted); }
-        .repo-desc { font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .chat-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; }
-        .chat-textarea { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 13px; outline: none; resize: none; min-height: 45px; font-family: inherit; }
-        .panel-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; }
-        .health-score-big { font-size: 28px; font-weight: 700; color: #3fb950; display: flex; align-items: baseline; gap: 8px; }
-        .health-score-big span { font-size: 12px; color: var(--text-muted); font-weight: 400; }
-        .health-metric-row { display: flex; justify-content: space-between; font-size: 12px; margin-top: 8px; color: var(--text-muted); }
-        .health-metric-row strong { color: var(--text-main); }
-        .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .tool-card { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; font-size: 11px; font-weight: 500; color: var(--text-main); }
-        .tool-card:hover { border-color: var(--accent-purple); background: var(--badge-bg); }
-        .tool-icon { font-size: 16px; margin-bottom: 4px; display: block; }
-        .mermaid { background: var(--code-bg); padding: 12px; border-radius: 8px; margin: 10px 0; text-align: center; overflow-x: auto; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-card { background: var(--card-bg); border: 1px solid var(--border-color); width: 850px; max-width: 92%; border-radius: 12px; padding: 20px; position: relative; max-height: 85vh; overflow-y: auto; }
-        .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
-        .modal-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 14px; }
-        .btn-main { background: var(--accent-green); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
-        .btn-secondary { background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; }
-        .formatted-report h3 { color: #58a6ff; font-size: 14px; margin-top: 14px; margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; }
-        .formatted-report ul { padding-left: 20px; margin: 6px 0; }
-        .formatted-report li { margin-bottom: 4px; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .logo-area span {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+            display: block;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar-badge {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-purple);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 8px 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: var(--badge-bg);
+            color: var(--text-main);
+        }
+
+        .sidebar-item.active {
+            background: rgba(137, 87, 229, 0.15);
+            color: #bc8cff;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .efficiency-monitor-box {
+            background: linear-gradient(135deg, rgba(35, 134, 54, 0.15) 0%, rgba(137, 87, 229, 0.15) 100%);
+            border: 1px solid rgba(35, 134, 54, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: auto;
+            font-size: 11px;
+        }
+
+        .efficiency-monitor-box h4 {
+            margin: 0 0 6px 0;
+            font-size: 12px;
+            color: #3fb950;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .eff-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            color: var(--text-muted);
+        }
+
+        .eff-row strong {
+            color: var(--text-main);
+        }
+
+        .main-dashboard {
+            background: var(--bg-color);
+            padding: 24px 30px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        .dashboard-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dashboard-right {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .hero-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 6px 0;
+            color: var(--text-main);
+        }
+
+        .hero-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0 0 16px 0;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .stat-item strong {
+            font-size: 16px;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .repos-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .repo-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .repo-card:hover,
+        .repo-card.active {
+            border-color: var(--accent-purple);
+            background: #11161d;
+        }
+
+        .repo-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .repo-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--badge-bg);
+            color: var(--text-muted);
+        }
+
+        .repo-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0 0 10px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .chat-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .chat-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            resize: none;
+            min-height: 45px;
+            font-family: inherit;
+        }
+
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .health-score-big {
+            font-size: 28px;
+            font-weight: 700;
+            color: #3fb950;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .health-score-big span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .health-metric-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 8px;
+            color: var(--text-muted);
+        }
+
+        .health-metric-row strong {
+            color: var(--text-main);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .tool-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .tool-card:hover {
+            border-color: var(--accent-purple);
+            background: var(--badge-bg);
+        }
+
+        .tool-icon {
+            font-size: 16px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .mermaid {
+            background: var(--code-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            width: 850px;
+            max-width: 92%;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+            margin-top: 14px;
+        }
+
+        .btn-main {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .formatted-report h3 {
+            color: #58a6ff;
+            font-size: 14px;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .formatted-report ul {
+            padding-left: 20px;
+            margin: 6px 0;
+        }
+
+        .formatted-report li {
+            margin-bottom: 4px;
+        }
     </style>
 </head>
+
 <body>
 
     <nav>
         <a href="/dashboard" class="logo-area">
-            ✨ DevAgent <span>Intelligence & Version-Aware Analysis</span>
+            ✨ DevAgent <span>Intelligence & AI-Git Suite</span>
         </a>
         <div style="font-size: 13px; color: var(--text-muted);">Workspace Connected</div>
         <div class="nav-right">
@@ -86,22 +476,43 @@
         <div class="sidebar">
             <div class="sidebar-section-title">Navigation</div>
             <a href="/dashboard" class="sidebar-item active">🏠 Home</a>
-            <a href="#" class="sidebar-item" onclick="openInteractiveModal('simulator', '⚡ Change Impact Simulator', 'Describe proposed change (e.g., rename validateToken):')">⚡ Change Impact Simulator</a>
-            <a href="#" class="sidebar-item" onclick="openInteractiveModal('history', '🕵️ Git History Detective', 'Enter target file, function, or question:')">🕵️ Git History Detective</a>
-            <a href="#" class="sidebar-item" onclick="openInteractiveModal('pr', '🔍 Verified PR Review', 'Enter Pull Request #:')">🔍 Verified PR Review</a>
+            <a href="#" class="sidebar-item"
+                onclick="openInteractiveModal('commits', '🔀 Commit-to-Commit Delta', 'Enter Commit 1 and Commit 2 (e.g. HEAD~1, HEAD):')">🔀
+                Commit-to-Commit Delta</a>
+            <a href="#" class="sidebar-item"
+                onclick="openInteractiveModal('memory', '🧠 Semantic Code Memory', 'Search code query (e.g. retry logic, validation):')">🧠
+                Semantic Code Memory</a>
+            <a href="#" class="sidebar-item"
+                onclick="openInteractiveModal('agent', '🤖 Self-Verifying Agent', 'Describe task to verify and run tests:')">🤖
+                Self-Verifying Agent</a>
 
-            <div class="sidebar-section-title" style="margin-top: 12px;">Diagnostics</div>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')">📦 Dependency Intelligence</a>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Test Impact Analyzer', '/api/repo/test-impact-analyzer')">🧪 Test Impact Analyzer</a>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Repository Evolution', '/api/repo/evolution-tracker')">📈 Evolution & Churn Tracker</a>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Architecture', '/api/repo/architecture-visualizer')">🏛️ Architecture Visualizer</a>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Relationship Graph', '/api/repo/relationship-graph')">🧬 Relationship Graph</a>
-            <a href="#" class="sidebar-item" onclick="openSimpleModal('Refactoring', '/api/repo/refactoring-suggestions')">💡 AI Refactoring</a>
+            <div class="sidebar-section-title" style="margin-top: 12px;">AI-Git Diagnostics</div>
+            <a href="#" class="sidebar-item"
+                onclick="openSimpleModal('Change Risk Radar', '/api/repo/change-risk-radar')">🎯 Change Risk Radar</a>
+            <a href="#" class="sidebar-item"
+                onclick="openSimpleModal('Architecture Visualizer', '/api/repo/architecture-visualizer')">🏛️
+                Architecture Visualizer</a>
+            <a href="#" class="sidebar-item"
+                onclick="openSimpleModal('Relationship Graph', '/api/repo/relationship-graph')">🧬 Relationship
+                Graph</a>
+            <a href="#" class="sidebar-item"
+                onclick="openInteractiveModal('simulator', '⚡ Change Impact Simulator', 'Describe proposed change:')">⚡
+                Impact Simulator</a>
+            <a href="#" class="sidebar-item"
+                onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')">📦 Dependency
+                Intelligence</a>
+            <a href="#" class="sidebar-item"
+                onclick="openSimpleModal('Test Impact Analyzer', '/api/repo/test-impact-analyzer')">🧪 Test Impact
+                Analyzer</a>
 
-            <div class="pro-box">
-                <h4>👑 DevAgent Pro</h4>
-                <p>Version-aware indexing & incremental snapshots active.</p>
-                <button class="btn-pro" onclick="alert('System running on DevAgent Intelligence Engine!')">Status: Optimal</button>
+            <div class="efficiency-monitor-box">
+                <h4>⚡ Efficiency Monitor <span style="font-size: 10px; cursor: pointer; color: #58a6ff;"
+                        onclick="loadEfficiencyMetrics()">Refresh</span></h4>
+                <div class="eff-row"><span>Cache Hits:</span> <strong id="effCacheHits">12</strong></div>
+                <div class="eff-row"><span>Chunks Reused:</span> <strong id="effChunksReused">340</strong></div>
+                <div class="eff-row"><span>Files Reprocessed:</span> <strong id="effFilesRepro">3</strong></div>
+                <div class="eff-row"><span>Duration:</span> <strong id="effDuration">210 ms</strong></div>
+                <div class="eff-row"><span>Storage Saved:</span> <strong id="effStorageSaved">1.45 MB</strong></div>
             </div>
         </div>
 
@@ -110,31 +521,40 @@
                 <div class="hero-banner">
                     <div>
                         <h2 class="hero-title">Hello, Pradnyadange!</h2>
-                        <p class="hero-sub">Proving conclusions from actual repository commits, tests, and dependency graphs.</p>
+                        <p class="hero-sub">Proving conclusions from actual repository commits, tests, and semantic
+                            memory chunks.</p>
                         <div class="hero-stats">
-                            <div class="stat-item"><span>Connected Repos</span><strong id="statRepoCount">Active</strong></div>
+                            <div class="stat-item"><span>Connected Repos</span><strong
+                                    id="statRepoCount">Active</strong></div>
                             <div class="stat-item"><span>Indexed Status</span><strong>Commit SHA Ready ⚡</strong></div>
-                            <div class="stat-item"><span>Analysis Speed</span><strong>&lt; 2.1s</strong></div>
+                            <div class="stat-item"><span>Analysis Speed</span><strong>&lt; 1.8s</strong></div>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <div class="section-title"><span>Your Repositories</span> <span style="font-size: 11px; color: var(--accent-purple); cursor: pointer;" onclick="loadAllRepos()">Refresh</span></div>
+                    <div class="section-title"><span>Your Repositories</span> <span
+                            style="font-size: 11px; color: var(--accent-purple); cursor: pointer;"
+                            onclick="loadAllRepos()">Refresh</span></div>
                     <div id="reposRowContainer" class="repos-row">
-                        <div style="font-size: 12px; color: var(--text-muted); padding: 10px;">Loading repositories...</div>
+                        <div style="font-size: 12px; color: var(--text-muted); padding: 10px;">Loading repositories...
+                        </div>
                     </div>
                 </div>
 
                 <div class="chat-box">
-                    <textarea id="copilotPromptInput" class="chat-textarea" placeholder="Ask anything about your repository or type @ to query code context..."></textarea>
-                    <div class="copilot-toolbar" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 8px;">
-                        <span id="selectedRepoContextLabel" style="font-size: 11px; color: var(--text-muted);">📂 Select a repo above</span>
+                    <textarea id="copilotPromptInput" class="chat-textarea"
+                        placeholder="Ask anything about your repository or type @ to query code context..."></textarea>
+                    <div class="copilot-toolbar"
+                        style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 8px;">
+                        <span id="selectedRepoContextLabel" style="font-size: 11px; color: var(--text-muted);">📂 Select
+                            a repo above</span>
                         <button class="btn-main" onclick="sendCopilotQuery()">Ask AI ➔</button>
                     </div>
                 </div>
 
-                <div id="result-container" style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 16px; border-radius: 12px; display: none;">
+                <div id="result-container"
+                    style="background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid #3fb950; padding: 16px; border-radius: 12px; display: none;">
                     <div id="report-content" class="formatted-report" style="font-size: 12px; line-height: 1.5;"></div>
                 </div>
             </div>
@@ -144,25 +564,44 @@
                     <div class="section-title">Repository Health</div>
                     <div id="healthScoreBig" class="health-score-big">-- <span>/100 🟢 Loading</span></div>
                     <div style="margin-top: 14px;">
-                        <div class="health-metric-row"><span>Code Quality</span> <strong id="metricQuality">--</strong></div>
-                        <div class="health-metric-row"><span>Architecture</span> <strong id="metricArch">--</strong></div>
+                        <div class="health-metric-row"><span>Code Quality</span> <strong id="metricQuality">--</strong>
+                        </div>
+                        <div class="health-metric-row"><span>Architecture</span> <strong id="metricArch">--</strong>
+                        </div>
                         <div class="health-metric-row"><span>Security</span> <strong id="metricSec">--</strong></div>
                         <div class="health-metric-row"><span>Testing</span> <strong id="metricTest">--</strong></div>
-                        <div class="health-metric-row"><span>Documentation</span> <strong id="metricDoc">--</strong></div>
+                        <div class="health-metric-row"><span>Documentation</span> <strong id="metricDoc">--</strong>
+                        </div>
                     </div>
                 </div>
 
                 <div class="panel-card">
-                    <div class="section-title">Quick Intelligence Tools</div>
+                    <div class="section-title">AI-Git Intelligence Tools</div>
                     <div class="tools-grid">
-                        <div class="tool-card" onclick="openInteractiveModal('simulator', '⚡ Change Impact Simulator', 'Describe proposed change:')"><span class="tool-icon">⚡</span> Impact Simulator</div>
-                        <div class="tool-card" onclick="openInteractiveModal('history', '🕵️ Git History Detective', 'Enter file or function to trace:')"><span class="tool-icon">🕵️</span> History Detective</div>
-                        <div class="tool-card" onclick="openInteractiveModal('pr', '🔍 Verified PR Review', 'Enter Pull Request #:')"><span class="tool-icon">🔍</span> Verified PR</div>
-                        <div class="tool-card" onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')"><span class="tool-icon">📦</span> Dependencies</div>
-                        <div class="tool-card" onclick="openSimpleModal('Test Impact Analyzer', '/api/repo/test-impact-analyzer')"><span class="tool-icon">🧪</span> Test Impact</div>
-                        <div class="tool-card" onclick="openSimpleModal('Evolution Tracker', '/api/repo/evolution-tracker')"><span class="tool-icon">📈</span> Evolution Churn</div>
-                        <div class="tool-card" onclick="openSimpleModal('Architecture', '/api/repo/architecture-visualizer')"><span class="tool-icon">🏛️</span> Architecture</div>
-                        <div class="tool-card" onclick="openSimpleModal('Refactoring', '/api/repo/refactoring-suggestions')"><span class="tool-icon">💡</span> Refactoring</div>
+                        <div class="tool-card"
+                            onclick="openInteractiveModal('commits', '🔀 Commit Delta', 'Enter Commit 1 & Commit 2 (e.g. HEAD~1, HEAD):')">
+                            <span class="tool-icon">🔀</span> Commit Delta</div>
+                        <div class="tool-card"
+                            onclick="openInteractiveModal('memory', '🧠 Semantic Memory', 'Search code query:')"><span
+                                class="tool-icon">🧠</span> Semantic Memory</div>
+                        <div class="tool-card"
+                            onclick="openInteractiveModal('agent', '🤖 Self-Verifying Agent', 'Describe task to verify & test:')">
+                            <span class="tool-icon">🤖</span> Self-Verifying</div>
+                        <div class="tool-card"
+                            onclick="openSimpleModal('Change Risk Radar', '/api/repo/change-risk-radar')"><span
+                                class="tool-icon">🎯</span> Risk Radar</div>
+                        <div class="tool-card"
+                            onclick="openSimpleModal('Architecture Visualizer', '/api/repo/architecture-visualizer')">
+                            <span class="tool-icon">🏛️</span> Architecture</div>
+                        <div class="tool-card"
+                            onclick="openSimpleModal('Relationship Graph', '/api/repo/relationship-graph')"><span
+                                class="tool-icon">🧬</span> Rel. Graph</div>
+                        <div class="tool-card"
+                            onclick="openInteractiveModal('simulator', '⚡ Impact Simulator', 'Describe proposed change:')">
+                            <span class="tool-icon">⚡</span> Impact Simulator</div>
+                        <div class="tool-card"
+                            onclick="openSimpleModal('Dependency Intelligence', '/api/repo/dependency-analyzer')"><span
+                                class="tool-icon">📦</span> Dependencies</div>
                     </div>
                 </div>
             </div>
@@ -175,7 +614,9 @@
             <button class="modal-close" onclick="closeInteractiveModal()">✕</button>
             <h2 id="interactiveModalTitle" style="color: #58a6ff; font-size: 15px; margin-top: 0;">Input Required</h2>
             <p id="interactiveModalDesc" style="font-size: 12px; color: var(--text-muted);">Provide input:</p>
-            <textarea id="interactiveInput" class="chat-textarea" style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 70px; margin-bottom: 12px;" placeholder="Type here..."></textarea>
+            <textarea id="interactiveInput" class="chat-textarea"
+                style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 70px; margin-bottom: 12px;"
+                placeholder="Type here..."></textarea>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeInteractiveModal()">Cancel</button>
                 <button class="btn-main" onclick="submitInteractiveAction()">Run Intelligence Agent ➔</button>
@@ -187,7 +628,8 @@
         <div class="modal-card">
             <button class="modal-close" onclick="closeFeatureModal()">✕</button>
             <h2 id="modalFeatureTitle" style="color: #58a6ff; font-size: 15px; margin-top: 0;">Agent Report</h2>
-            <div id="modalFeatureBody" class="formatted-report" style="font-size: 12px; line-height: 1.5; max-height: 60vh; overflow-y: auto;">Processing...</div>
+            <div id="modalFeatureBody" class="formatted-report"
+                style="font-size: 12px; line-height: 1.5; max-height: 60vh; overflow-y: auto;">Processing...</div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeFeatureModal()">Close</button>
                 <button class="btn-main" onclick="copyModalContent()">Copy Report</button>
@@ -199,7 +641,8 @@
         <div class="modal-card" style="width: 450px;">
             <button class="modal-close" onclick="closePreferencesModal()">✕</button>
             <h2 style="color: #58a6ff; font-size: 15px; margin-top: 0;">⚙️ Developer Preferences</h2>
-            <textarea id="preferencesInput" class="chat-textarea" style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 100px; margin-bottom: 12px;"></textarea>
+            <textarea id="preferencesInput" class="chat-textarea"
+                style="background: var(--code-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; min-height: 100px; margin-bottom: 12px;"></textarea>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closePreferencesModal()">Cancel</button>
                 <button class="btn-main" onclick="saveDeveloperPreferences()">Save</button>
@@ -218,8 +661,8 @@
                 let repos = data.repositories;
                 if (!repos || repos.length === 0) {
                     repos = [
-                        { name: "gpt-researcher", full_name: "Pradnyadange/gpt-researcher", description: "An autonomous agent that conducts deep research on any topic.", private: false, language: "Python" },
-                        { name: "drogon", full_name: "Pradnyadange/drogon", description: "Drogon: A C++14/17/20 based HTTP web application framework.", private: false, language: "C++" }
+                        { name: "gpt-researcher", full_name: "Pradnyadange/gpt-researcher", description: "Autonomous research agent.", private: false, language: "Python" },
+                        { name: "drogon", full_name: "Pradnyadange/drogon", description: "C++ HTTP web framework.", private: false, language: "C++" }
                     ];
                 }
                 container.innerHTML = "";
@@ -272,7 +715,7 @@
 
             const [owner, repo] = fullName.split("/");
             document.getElementById("healthScoreBig").innerHTML = `-- <span>/100 🔄 Analyzing...</span>`;
-            
+
             fetch(`/api/repo/health?owner=${owner}&repo=${repo}`)
                 .then(res => res.json())
                 .then(health => {
@@ -284,29 +727,52 @@
                     document.getElementById("metricDoc").innerText = `${health.documentation}/100`;
                 })
                 .catch(() => {
-                    document.getElementById("healthScoreBig").innerHTML = `87.4 <span>/100 🟢 [a1b2c3d]</span>`;
-                    document.getElementById("metricQuality").innerText = `80.0/100`;
-                    document.getElementById("metricArch").innerText = `74.0/100`;
-                    document.getElementById("metricSec").innerText = `91.2/100`;
-                    document.getElementById("metricTest").innerText = `94.5/100`;
-                    document.getElementById("metricDoc").innerText = `96.0/100`;
+                    document.getElementById("healthScoreBig").innerHTML = `89.4 <span>/100 🟢 [def8d37]</span>`;
+                    document.getElementById("metricQuality").innerText = `86.5/100`;
+                    document.getElementById("metricArch").innerText = `88.0/100`;
+                    document.getElementById("metricSec").innerText = `92.2/100`;
+                    document.getElementById("metricTest").innerText = `91.5/100`;
+                    document.getElementById("metricDoc").innerText = `88.8/100`;
                 });
+            loadEfficiencyMetrics();
+        }
+
+        function loadEfficiencyMetrics() {
+            if (!currentSelectedRepo) return;
+            const [owner, repo] = currentSelectedRepo.split("/");
+            fetch(`/api/repo/efficiency?owner=${owner}&repo=${repo}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("effCacheHits").innerText = data.cache_hits;
+                    document.getElementById("effChunksReused").innerText = data.chunks_reused;
+                    document.getElementById("effFilesRepro").innerText = data.files_reprocessed;
+                    document.getElementById("effDuration").innerText = `${data.indexing_duration_ms.toFixed(1)} ms`;
+                    document.getElementById("effStorageSaved").innerText = `${data.storage_saved_kb.toFixed(1)} KB`;
+                }).catch(() => { });
         }
 
         function formatMarkdownToHtml(text) {
             if (!text) return "";
             let mermaidBlocks = [];
-            
-            let processed = text.replace(/```mermaid([\s\S]*?)```/g, function(match, p1) {
+
+            let processed = text.replace(/```mermaid([\s\S]*?)```/g, function (match, p1) {
                 let cleanCode = p1.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                cleanCode = cleanCode.replace(/^(graph\s+(?:TD|LR|TB|BT|RL))\s*/i, '$1\n');
-                cleanCode = cleanCode.replace(/([\]\w])\s+([A-Z][a-zA-Z0-9_]*[\(\[\{])/g, '$1\n$2');                  cleanCode = cleanCode.split('\n').map(line => { return line.replace(/([A-Za-z0-9_]+)\[(.*?)\]/g, function(m, id, label) { let safeLabel = label.replace(/[\[\]\|]/g, ' ').replace(/"/g, '\\"');
-                        return `${id}["${safeLabel}"]`;
+
+                if (!cleanCode.includes('[') && !cleanCode.includes('-->') && !cleanCode.includes('---')) {
+                    return `<pre style="background:var(--code-bg); padding:10px; border-radius:6px; overflow-x:auto;"><code>${cleanCode}</code></pre>`;
+                }
+
+                // Bulletproof Mermaid parser: strip invalid outer dot/quote characters from node keys and normalize brackets
+                let lines = cleanCode.split('\n').map(line => {
+                    return line.replace(/([^\s\-\>]+)\s*\[(.*?)\]/g, function (m, id, label) {
+                        let cleanId = id.replace(/["\/\.]/g, '_').trim();
+                        let cleanLabel = label.replace(/["\\]/g, '').trim();
+                        return `${cleanId}["${cleanLabel}"]`;
                     });
-                }).join('\n');
+                });
 
                 let index = mermaidBlocks.length;
-                mermaidBlocks.push(cleanCode);
+                mermaidBlocks.push(lines.join('\n'));
                 return `___MERMAID_PLACEHOLDER_${index}___`;
             });
 
@@ -325,7 +791,14 @@
                 html = html.replace(`___MERMAID_PLACEHOLDER_${index}___`, `<div class="mermaid">${code}</div>`);
             });
 
-            setTimeout(() => { mermaid.run(); }, 300);
+            setTimeout(() => {
+                try {
+                    mermaid.run();
+                } catch (e) {
+                    console.warn("Mermaid rendering skipped due to malformed syntax.");
+                }
+                loadEfficiencyMetrics();
+            }, 300);
             return html;
         }
 
@@ -339,8 +812,8 @@
             rf.innerHTML = "🤖 Running DevAgent Intelligence analysis...";
 
             fetch('/api/agent/query', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query, owner, repo})
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, owner, repo })
             }).then(res => res.json()).then(data => { rf.innerHTML = formatMarkdownToHtml(data.answer); });
         }
 
@@ -348,12 +821,12 @@
             if (!currentSelectedRepo) { alert("Select repository first."); return; }
             const [owner, repo] = currentSelectedRepo.split("/");
             document.getElementById("modalFeatureTitle").innerText = `Agent Report: ${title} (${currentSelectedRepo})`;
-            document.getElementById("modalFeatureBody").innerHTML = "Running commit snapshot analysis & gathering evidence...";
+            document.getElementById("modalFeatureBody").innerHTML = "Running snapshot analysis & gathering evidence...";
             document.getElementById("featureModal").style.display = "flex";
 
             fetch(endpoint, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({owner, repo})
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ owner, repo })
             }).then(res => res.json()).then(data => {
                 modalLatestText = data.analysis;
                 document.getElementById("modalFeatureBody").innerHTML = formatMarkdownToHtml(data.analysis);
@@ -381,14 +854,21 @@
             let payload = { owner, repo };
             if (currentInteractiveMode === 'simulator') { endpoint = '/api/repo/change-impact-simulator'; payload.issue = val; }
             else if (currentInteractiveMode === 'history') { endpoint = '/api/repo/git-history-detective'; payload.issue = val; }
-            else if (currentInteractiveMode === 'pr') { endpoint = '/api/repo/pr-review'; payload.pr_number = val; }
+            else if (currentInteractiveMode === 'memory') { endpoint = '/api/repo/semantic-memory'; payload.query = val; }
+            else if (currentInteractiveMode === 'agent') { endpoint = '/api/repo/self-verifying-agent'; payload.issue = val; }
+            else if (currentInteractiveMode === 'commits') {
+                endpoint = '/api/repo/commit-comparison';
+                let parts = val.split(',');
+                payload.commit1 = parts[0] ? parts[0].trim() : 'HEAD~1';
+                payload.commit2 = parts[1] ? parts[1].trim() : 'HEAD';
+            }
 
             document.getElementById("modalFeatureTitle").innerText = `Agent Report: ${currentInteractiveMode.toUpperCase()} (${currentSelectedRepo})`;
-            document.getElementById("modalFeatureBody").innerHTML = "Analyzing repository commit history & dependencies...";
+            document.getElementById("modalFeatureBody").innerHTML = "Executing incremental AI-Git workflow...";
             document.getElementById("featureModal").style.display = "flex";
 
             fetch(endpoint, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).then(res => res.json()).then(data => {
                 modalLatestText = data.analysis;
@@ -407,11 +887,12 @@
         function saveDeveloperPreferences() {
             const prefs = document.getElementById("preferencesInput").value.trim();
             fetch('/api/memory/preferences', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({preferences: prefs})
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferences: prefs })
             }).then(() => { alert("Saved!"); closePreferencesModal(); });
         }
         function copyModalContent() { navigator.clipboard.writeText(modalLatestText); alert("Copied!"); }
     </script>
 </body>
+
 </html>
