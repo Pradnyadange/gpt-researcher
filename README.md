@@ -1,1 +1,67 @@
-DevAgent Intelligence 🚀DevAgent Intelligence is an advanced AI-powered GitHub developer assistant designed to move beyond generic software explanations. Instead of making broad assumptions, DevAgent proves its conclusions from the actual repository, its live commit history, and its tests.   🌟 Key FeaturesAI Change Impact Simulator: Predicts what breaks when a change is proposed, mapping affected files, dependency chains, confidence labels (Confirmed vs Possible), and step-by-step migration plans.   Git History Detective: Traces code through real history (blame, rename, and move tracking) to answer why code was added, separating provable commit evidence from AI inferences.   Dependency Intelligence: Analyzes actual imports, transitive dependency paths, and verifiable vulnerability advisories mapped directly to lockfiles.   Verified Review: Reviews changed lines against base branches with inline severity ratings, confidence levels, and suggested patch diffs.   Test Impact Analyzer: Maps tests to source files/symbols and reports sandbox execution status.   Repository Evolution Tracker: Identifies file churn, recurring defect hotspots, and technical-debt trends over time.   🧠 How DevAgent Differs from Standard GitWhile Git is a version control system that tracks what changes were made and lets you store snapshots of code across commits, DevAgent Intelligence provides semantic code understanding and automated impact analysis.Feature / CapabilityStandard GitDevAgent IntelligencePrimary PurposeVersion control, history tracking, and code distribution.Semantic code analysis, impact simulation, and AI-driven developer workflows.Code UnderstandingAgnostic to code syntax; treats files as flat text blobs or diffs.Uses content-based chunking to parse code into semantic units (functions, classes, modules) keyed by content hashes.   Change AnalysisShows raw line diffs (git diff) of what was added or deleted.Simulates downstream cascading effects across APIs, database calls, dependencies, and test suites before you even commit.   Caching & Re-indexingRe-scans or checks out whole directories per operation.Employs delta synchronization and version-aware caching to recompute only changed chunks and dependents instantly.   Evidence & TraceabilityLinks commits to author names and timestamps.Links every finding directly to exact file paths, line ranges, and cryptographic Commit SHAs.   🏗️ Architecture & Incremental EngineInspired by AI-Git concepts, DevAgent utilizes:Content-Based Chunking & Deduplication: Stores and embeds unique chunks once, ensuring stable identity across edits elsewhere in the file.   Delta Synchronization: On each new commit, DevAgent diffs against the prior snapshot and reprocesses only modified files.   Version-Aware Storage: All analysis results are tied to specific commit SHAs, guaranteeing that reports remain reproducible and accurate to that exact codebase version.
+# DevAgent Intelligence & AI-Git Suite ✦
+
+An enterprise-grade, evidence-grounded universal Git repository analysis and architectural intelligence suite. DevAgent bridges the gap between static version control and autonomous AI reasoning by anchoring every insight directly in commit-pinned source code, preventing hallucinations and speculative assumptions.
+
+---
+
+## 🏗️ Technical Stack
+
+- **Backend Framework**: `FastAPI` (Asynchronous Python API gateway with high-throughput routing).
+- **Database & Persistence**: `SQLite` (Lightweight local storage for semantic memory chunks, evidence provenance stores, and performance caching).
+- **AI Core & Engine**: `Google GenAI SDK` powered by **Gemini 2.5 Flash** (Enabling lightning-fast, high-context code comprehension, multi-node architectural mapping, and structured markdown synthesis).
+- **Authentication & Security**: GitHub OAuth / Personal Access Tokens with secure `Starlette SessionMiddleware` persistence and token expiration checks.
+- **Frontend Presentation**: Modern single-page responsive dashboard built with `Tailwind CSS`, interactive agent report modals, and real-time Mermaid.js graph visualization.
+
+---
+
+## 🧠 The LLM Model: Gemini 2.5 Flash
+
+DevAgent leverages **Gemini 2.5 Flash** as its core cognitive engine. 
+- **Massive Context Window**: Allows the ingestion and cross-reference of dozens of repository files simultaneously.
+- **Precise Structured Output**: Utilized to translate raw code snippets into rigorous evidence categories (`iteration`, `data_parsing`, `hardware_polling`, `packet_processing`, `entry_point`, `interface_declaration`).
+- **Resilient Fallback Design**: Features intelligent quota-monitoring (`429` / `RESOURCE_EXHAUSTED` handling) that seamlessly transitions to deterministic, cache-backed architectural Mermaid diagrams when upstream limits are reached.
+
+---
+
+## ⚡ How DevAgent AI-Git Differs from Existing Git
+
+| Feature / Capability | Traditional Git | DevAgent AI-Git Suite |
+| :--- | :--- | :--- |
+| **Commit Delta Comparison** | Shows raw line diffs (`+` / `-`) without semantic context. | Computes actual diff stats while generating an **evidence-backed impact analysis graph**. |
+| **Code Understanding** | Blind text search (`grep`) or manual file traversal. | **Semantic Code Memory** allowing natural language queries across any repository file type (`.py`, `.cpp`, `.ts`, `.md`, `.json`, etc.). |
+| **Risk Assessment** | Manual code review and guesswork. | **Change Risk Radar & Fragility Index** calculating blast radius and coupling reachability. |
+| **Verification** | Hope tests pass. | **Self-Verifying Agent** that grounds conclusions in commit-pinned permalinks (`#L12-L28`). |
+
+---
+
+## 🎯 Thoughtful & Principled AI Integration
+
+Most AI coding assistants suffer from hallucination—inventing function names, assuming modules are safe, or generating unverified claims. DevAgent was built on strict **Evidence-Grounded AI Engineering**:
+
+1. **Retrieval Before Generation**: The system never asks the LLM to guess. It first traverses the Git tree, ranks candidates using smart keyword scoring, fetches exact file blobs at the target commit SHA, and feeds structured code chunks into the prompt.
+2. **Strict Provenance Tracking**: Every finding is categorized into strict provenance tiers:
+   - **`Verified`**: Backed by successfully retrieved code chunks and commit-pinned permalinks.
+   - **`Inferred`**: Reasonable architectural hypotheses explicitly marked as inferences.
+   - **`Unknown / Insufficient evidence`**: When analysis data is partial or missing, DevAgent refuses to fabricate conclusions, ensuring absolute auditability.
+3. **Multi-Node Visual Mapping**: Automatically generates dynamic `Mermaid.js` diagrams representing component hierarchies, call graphs, and dependency trees directly inside interactive modals.
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone & Setup Environment**:
+   ```bash
+   git clone https://github.com/your-username/devagent-intelligence.git
+   cd devagent-intelligence
+   pip install -r requirements.txt
+   ```
+2. **Configure Environment Variables**:
+   ```bash
+   export GEMINI_API_KEY="your-gemini-api-key"
+   export SESSION_SECRET="your-secure-session-secret"
+   ```
+3. **Run the Backend Server**:
+   ```bash
+   python backend/server/app.py
+   ```
+4. **Access the Suite**: Open `http://127.0.0.1:8000` in your browser, authenticate with your GitHub token, and select any repository to start exploring!
